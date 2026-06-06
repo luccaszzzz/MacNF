@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#4f46e5" />
+    <title>MacNF — Notas Fiscais</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .nav-item.active {
+        background-color: #eef2ff;
+        color: #4338ca;
+        font-weight: 500;
+      }
+      .nav-item.active i {
+        color: #4338ca;
+      }
+      /* Botões maiores no mobile pra facilitar o toque */
+      @media (max-width: 768px) {
+        button,
+        .btn {
+          min-height: 44px;
+        }
+        input,
+        select,
+        textarea {
+          font-size: 16px !important;
+        } /* evita zoom no iOS */
+      }
+      /* Sidebar mobile slide-in */
+      .sidebar-mobile {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+      }
+      .sidebar-mobile.open {
+        transform: translateX(0);
+      }
+      .backdrop {
+        background: rgba(15, 23, 42, 0.5);
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 text-slate-800">
+    <!-- ============ LOGIN ============ -->
+    <div
+      id="loginView"
+      class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-slate-200"
+    >
+      <div
+        class="bg-white rounded-xl shadow-lg p-6 sm:p-8 w-full max-w-sm border border-slate-200"
+      >
+        <div class="flex items-center gap-2 mb-1">
+          <div
+            class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center"
+          >
+            <i data-lucide="file-text" class="text-white w-5 h-5"></i>
+          </div>
+          <h1 class="text-2xl font-semibold text-slate-900">MacNF</h1>
+        </div>
+        <p class="text-sm text-slate-500 mb-6">Gestão de notas fiscais</p>
+        <form id="loginForm" class="space-y-4">
+          <div>
+            <label class="block text-sm text-slate-700 mb-1.5">Usuário</label>
+            <input
+              id="username"
+              type="text"
+              required
+              autocomplete="username"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            />
+          </div>
+          <div>
+            <label class="block text-sm text-slate-700 mb-1.5">Senha</label>
+            <input
+              id="password"
+              type="password"
+              required
+              autocomplete="current-password"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            />
+          </div>
+          <div
+            id="loginError"
+            class="text-sm text-red-600 hidden bg-red-50 border border-red-200 rounded-lg px-3 py-2"
+          ></div>
+          <button
+            type="submit"
+            class="w-full bg-indigo-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-indigo-700 transition"
+          >
+            Entrar
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ============ APP ============ -->
+    <div id="mainView" class="hidden min-h-screen md:flex">
+      <!-- Header mobile (visível apenas em telas pequenas) -->
+      <header
+        class="md:hidden sticky top-0 z-30 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between"
+      >
+        <button onclick="toggleSidebar()" class="p-2 -ml-2 text-slate-700">
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+        <div class="flex items-center gap-2">
+          <div
+            class="w-7 h-7 bg-indigo-600 rounded-md flex items-center justify-center"
+          >
+            <i data-lucide="file-text" class="text-white w-4 h-4"></i>
+          </div>
+          <span class="font-semibold text-slate-900">MacNF</span>
+        </div>
+        <button onclick="logout()" class="p-2 -mr-2 text-slate-600">
+          <i data-lucide="log-out" class="w-5 h-5"></i>
+        </button>
+      </header>
+
+      <!-- Backdrop (visível só quando a sidebar mobile estiver aberta) -->
+      <div
+        id="sidebarBackdrop"
+        onclick="toggleSidebar()"
+        class="md:hidden hidden fixed inset-0 z-40 backdrop"
+      ></div>
+
+      <!-- Sidebar -->
+      <aside
+        id="sidebar"
+        class="sidebar-mobile md:transform-none fixed md:static inset-y-0 left-0 z-50 w-64 md:w-60 bg-white border-r border-slate-200 flex flex-col"
+      >
+        <div
+          class="px-5 py-5 border-b border-slate-100 flex items-center justify-between"
+        >
+          <div class="flex items-center gap-2">
+            <div
+              class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center"
+            >
+              <i data-lucide="file-text" class="text-white w-4 h-4"></i>
+            </div>
+            <span class="font-semibold text-slate-900">MacNF</span>
+          </div>
+          <button
+            onclick="toggleSidebar()"
+            class="md:hidden p-1 text-slate-500"
+          >
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+          <button
+            onclick="showTab('tab-dashboard')"
+            data-tab="tab-dashboard"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+          >
+            <i
+              data-lucide="layout-dashboard"
+              class="w-4 h-4 text-slate-500"
+            ></i>
+            Painel
+          </button>
+          <button
+            onclick="showTab('tab-nova')"
+            data-tab="tab-nova"
+            class="nav-item estoquista-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+          >
+            <i data-lucide="file-plus" class="w-4 h-4 text-slate-500"></i>
+            Nova nota
+          </button>
+          <button
+            onclick="showTab('tab-notas')"
+            data-tab="tab-notas"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+          >
+            <i data-lucide="files" class="w-4 h-4 text-slate-500"></i>
+            Notas fiscais
+          </button>
+          <button
+            onclick="showTab('tab-relatorio')"
+            data-tab="tab-relatorio"
+            class="nav-item fiscal-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+          >
+            <i data-lucide="bar-chart-3" class="w-4 h-4 text-slate-500"></i>
+            Relatórios
+          </button>
+          <button
+            onclick="showTab('tab-fornecedor')"
+            data-tab="tab-fornecedor"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+          >
+            <i data-lucide="building-2" class="w-4 h-4 text-slate-500"></i>
+            Fornecedores
+          </button>
+        </nav>
+
+        <div class="p-3 border-t border-slate-100">
+          <div class="flex items-center justify-between px-2 py-1">
+            <div class="min-w-0">
+              <p
+                class="text-sm font-medium text-slate-800 truncate"
+                id="userName"
+              ></p>
+              <p class="text-xs text-slate-500" id="userRole"></p>
+            </div>
+            <button
+              onclick="logout()"
+              title="Sair"
+              class="hidden md:block text-slate-400 hover:text-slate-700 p-1"
+            >
+              <i data-lucide="log-out" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main content -->
+      <main class="flex-1 overflow-auto">
+        <!-- ===== Dashboard ===== -->
+        <section id="tab-dashboard" class="tab hidden p-4 sm:p-6 lg:p-8">
+          <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 mb-1">
+            Painel
+          </h2>
+          <p class="text-sm text-slate-500 mb-5 sm:mb-6" id="dashSubtitle"></p>
+
+          <div
+            class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
+          >
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs sm:text-sm text-slate-600">Total</span>
+                <i data-lucide="files" class="w-4 h-4 text-slate-400"></i>
+              </div>
+              <p
+                class="text-2xl sm:text-3xl font-semibold text-slate-900"
+                id="statTotal"
+              >
+                —
+              </p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs sm:text-sm text-slate-600"
+                  >Em análise</span
+                >
+                <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+              </div>
+              <p
+                class="text-2xl sm:text-3xl font-semibold text-amber-600"
+                id="statAnalise"
+              >
+                —
+              </p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs sm:text-sm text-slate-600">No mês</span>
+                <i
+                  data-lucide="check-circle-2"
+                  class="w-4 h-4 text-emerald-500"
+                ></i>
+              </div>
+              <p
+                class="text-2xl sm:text-3xl font-semibold text-emerald-600"
+                id="statMes"
+              >
+                —
+              </p>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs sm:text-sm text-slate-600">Lançadas</span>
+                <i data-lucide="check-check" class="w-4 h-4 text-slate-400"></i>
+              </div>
+              <p
+                class="text-2xl sm:text-3xl font-semibold text-slate-900"
+                id="statLancadas"
+              >
+                —
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-xl">
+            <div
+              class="px-4 sm:px-5 py-4 border-b border-slate-100 flex items-center justify-between"
+            >
+              <h3 class="font-semibold text-slate-900">Notas recentes</h3>
+              <button
+                onclick="showTab('tab-notas')"
+                class="text-sm text-indigo-600 hover:text-indigo-700"
+              >
+                Ver todas →
+              </button>
+            </div>
+            <div id="dashRecent" class="divide-y divide-slate-100"></div>
+          </div>
+        </section>
+
+        <!-- ===== Nova nota ===== -->
+        <section
+          id="tab-nova"
+          class="tab hidden estoquista-only p-4 sm:p-6 lg:p-8"
+        >
+          <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 mb-1">
+            Cadastrar nota fiscal
+          </h2>
+          <p class="text-sm text-slate-500 mb-5 sm:mb-6">
+            Preencha os dados e envie ao setor fiscal.
+          </p>
+
+          <form
+            id="notaForm"
+            class="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 max-w-3xl"
+          >
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                  >Fornecedor</label
+                >
+                <select
+                  id="nf_fornecedor"
+                  required
+                  class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                ></select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                  >Número da nota</label
+                >
+                <input
+                  id="nf_numero"
+                  type="text"
+                  inputmode="numeric"
+                  required
+                  class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                  >Chave de acesso</label
+                >
+                <input
+                  id="nf_chave"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="44"
+                  required
+                  placeholder="44 dígitos"
+                  class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                  >PDF da nota</label
+                >
+                <div
+                  class="border-2 border-dashed border-slate-300 rounded-lg p-4 hover:border-indigo-400 transition"
+                >
+                  <input
+                    id="nf_pdf"
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    required
+                    class="w-full text-sm"
+                  />
+                </div>
+              </div>
+              <div class="md:col-span-2">
+                <label
+                  class="flex justify-between text-sm font-medium text-slate-700 mb-1.5"
+                >
+                  <span>Observação</span>
+                  <span class="text-xs text-slate-400" id="obsCount"
+                    >0 / 1000</span
+                  >
+                </label>
+                <textarea
+                  id="nf_obs"
+                  maxlength="1000"
+                  rows="3"
+                  class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                ></textarea>
+              </div>
+            </div>
+            <div class="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
+              <button
+                type="submit"
+                class="w-full sm:w-auto bg-indigo-600 text-white rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+              >
+                <i data-lucide="send" class="w-4 h-4"></i>
+                Salvar e enviar ao fiscal
+              </button>
+              <button
+                type="reset"
+                class="text-sm text-slate-600 hover:text-slate-900 py-2"
+              >
+                Limpar
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ===== Notas ===== -->
+        <section id="tab-notas" class="tab hidden p-4 sm:p-6 lg:p-8">
+          <div
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6"
+          >
+            <div>
+              <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 mb-1">
+                Notas fiscais
+              </h2>
+              <p class="text-sm text-slate-500" id="notasSubtitle"></p>
+            </div>
+            <select
+              id="filtroStatus"
+              onchange="loadNotas()"
+              class="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"
+            >
+              <option value="">Todos os status</option>
+              <option value="em_analise">Em análise</option>
+              <option value="lancada">Lançadas</option>
+            </select>
+          </div>
+
+          <!-- Tabela (desktop ≥ md) -->
+          <div
+            class="hidden md:block bg-white border border-slate-200 rounded-xl overflow-hidden"
+          >
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead
+                  class="text-left text-xs uppercase text-slate-500 bg-slate-50 border-b border-slate-200"
+                >
+                  <tr>
+                    <th class="px-4 py-3 font-medium">Número</th>
+                    <th class="px-4 py-3 font-medium">Fornecedor</th>
+                    <th class="px-4 py-3 font-medium">Status</th>
+                    <th class="px-4 py-3 font-medium">Criada em</th>
+                    <th class="px-4 py-3 font-medium">PDF</th>
+                    <th class="px-4 py-3 font-medium text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="notasBody" class="divide-y divide-slate-100"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Cards (mobile < md) -->
+          <div id="notasCards" class="md:hidden space-y-3"></div>
+        </section>
+
+        <!-- ===== Relatório ===== -->
+        <section
+          id="tab-relatorio"
+          class="tab hidden fiscal-only p-4 sm:p-6 lg:p-8"
+        >
+          <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 mb-1">
+            Relatórios
+          </h2>
+          <p class="text-sm text-slate-500 mb-5 sm:mb-6">
+            Notas lançadas por período.
+          </p>
+
+          <div
+            class="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 mb-6"
+          >
+            <div
+              class="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 sm:items-end"
+            >
+              <div>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5"
+                  >Ano</label
+                >
+                <input
+                  id="rel_ano"
+                  type="number"
+                  value="2026"
+                  class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm sm:w-28"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-600 mb-1.5"
+                  >Mês</label
+                >
+                <select
+                  id="rel_mes"
+                  class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white sm:w-40"
+                >
+                  <option value="">Todos</option>
+                  <option value="1">Janeiro</option>
+                  <option value="2">Fevereiro</option>
+                  <option value="3">Março</option>
+                  <option value="4">Abril</option>
+                  <option value="5">Maio</option>
+                  <option value="6">Junho</option>
+                  <option value="7">Julho</option>
+                  <option value="8">Agosto</option>
+                  <option value="9">Setembro</option>
+                  <option value="10">Outubro</option>
+                  <option value="11">Novembro</option>
+                  <option value="12">Dezembro</option>
+                </select>
+              </div>
+              <button
+                onclick="loadRelatorio()"
+                class="col-span-2 sm:col-span-1 bg-indigo-600 text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+              >
+                <i data-lucide="play" class="w-4 h-4"></i>
+                Gerar
+              </button>
+            </div>
+          </div>
+
+          <div id="relResult"></div>
+        </section>
+
+        <!-- ===== Fornecedores ===== -->
+        <section id="tab-fornecedor" class="tab hidden p-4 sm:p-6 lg:p-8">
+          <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 mb-1">
+            Fornecedores
+          </h2>
+          <p class="text-sm text-slate-500 mb-5 sm:mb-6">
+            Cadastre os fornecedores que emitem suas notas.
+          </p>
+
+          <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
+            <div
+              class="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-4 sm:p-6 self-start"
+            >
+              <h3 class="font-semibold text-slate-900 mb-4">Novo fornecedor</h3>
+              <form id="fornForm" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                    >CNPJ</label
+                  >
+                  <input
+                    id="forn_cnpj"
+                    type="text"
+                    inputmode="numeric"
+                    required
+                    placeholder="00.000.000/0000-00"
+                    class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                    >Nome / razão social</label
+                  >
+                  <input
+                    id="forn_nome"
+                    type="text"
+                    required
+                    class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  class="w-full bg-indigo-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-indigo-700 transition"
+                >
+                  Cadastrar
+                </button>
+              </form>
+            </div>
+
+            <div
+              class="lg:col-span-3 bg-white border border-slate-200 rounded-xl"
+            >
+              <div class="px-4 sm:px-5 py-4 border-b border-slate-100">
+                <h3 class="font-semibold text-slate-900">Cadastrados</h3>
+              </div>
+              <ul id="fornList" class="divide-y divide-slate-100"></ul>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Toast -->
+    <div
+      id="toast"
+      class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 hidden z-50 flex justify-center sm:justify-end"
+    >
+      <div
+        id="toastBox"
+        class="bg-slate-900 text-white text-sm rounded-lg px-4 py-3 shadow-lg flex items-center gap-2 max-w-sm"
+      ></div>
+    </div>
+
+    <script>
+      const API = window.location.origin + "/api";
+      let token = localStorage.getItem("macnf_token");
+      let user = JSON.parse(localStorage.getItem("macnf_user") || "null");
+
+      // ---------- mobile sidebar ----------
+      function toggleSidebar() {
+        const sb = document.getElementById("sidebar");
+        const bd = document.getElementById("sidebarBackdrop");
+        sb.classList.toggle("open");
+        bd.classList.toggle("hidden");
+      }
+      function closeSidebar() {
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("sidebarBackdrop").classList.add("hidden");
+      }
+
+      // ---------- helpers ----------
+      function showToast(msg, type = "info") {
+        const colors = {
+          info: "bg-slate-900",
+          success: "bg-emerald-600",
+          error: "bg-red-600",
+        };
+        const icons = {
+          info: "info",
+          success: "check-circle-2",
+          error: "alert-circle",
+        };
+        const box = document.getElementById("toastBox");
+        box.className = `${colors[type]} text-white text-sm rounded-lg px-4 py-3 shadow-lg flex items-center gap-2 max-w-sm`;
+        box.innerHTML = `<i data-lucide="${icons[type]}" class="w-4 h-4 flex-shrink-0"></i><span>${msg}</span>`;
+        document.getElementById("toast").classList.remove("hidden");
+        lucide.createIcons();
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(
+          () => document.getElementById("toast").classList.add("hidden"),
+          3000,
+        );
+      }
+
+      async function api(method, path, data, isFormData = false) {
+        const headers = { Authorization: `Token ${token}` };
+        let body;
+        if (data) {
+          if (isFormData) body = data;
+          else {
+            headers["Content-Type"] = "application/json";
+            body = JSON.stringify(data);
+          }
+        }
+        const res = await fetch(API + path, { method, headers, body });
+        if (!res.ok) {
+          const txt = await res.text();
+          throw new Error(txt || res.statusText);
+        }
+        return res.status === 204 ? null : res.json();
+      }
+
+      // ---------- login ----------
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const err = document.getElementById("loginError");
+          err.classList.add("hidden");
+          try {
+            const res = await fetch(API + "/login/", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                username: document.getElementById("username").value,
+                password: document.getElementById("password").value,
+              }),
+            });
+            if (!res.ok) throw new Error("Usuário ou senha inválidos");
+            const data = await res.json();
+            token = data.token;
+            user = data;
+            localStorage.setItem("macnf_token", token);
+            localStorage.setItem("macnf_user", JSON.stringify(user));
+            showApp();
+          } catch (e) {
+            err.textContent = e.message;
+            err.classList.remove("hidden");
+          }
+        });
+
+      function logout() {
+        localStorage.removeItem("macnf_token");
+        localStorage.removeItem("macnf_user");
+        token = null;
+        user = null;
+        document.getElementById("mainView").classList.add("hidden");
+        document.getElementById("loginView").classList.remove("hidden");
+      }
+
+      function showApp() {
+        document.getElementById("loginView").classList.add("hidden");
+        document.getElementById("mainView").classList.remove("hidden");
+        document.getElementById("userName").textContent = user.username;
+        document.getElementById("userRole").textContent = user.is_fiscal
+          ? "Setor fiscal"
+          : "Estoquista";
+
+        document.querySelectorAll(".fiscal-only").forEach((el) => {
+          el.style.display = user.is_fiscal ? "" : "none";
+        });
+        document.querySelectorAll(".estoquista-only").forEach((el) => {
+          el.style.display = user.is_estoquista ? "" : "none";
+        });
+
+        lucide.createIcons();
+        showTab("tab-dashboard");
+      }
+
+      // ---------- nav ----------
+      function showTab(id) {
+        document
+          .querySelectorAll(".tab")
+          .forEach((t) => t.classList.add("hidden"));
+        document.getElementById(id).classList.remove("hidden");
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((b) => b.classList.toggle("active", b.dataset.tab === id));
+        closeSidebar(); // fecha a sidebar mobile ao navegar
+        if (id === "tab-dashboard") loadDashboard();
+        if (id === "tab-notas") loadNotas();
+        if (id === "tab-fornecedor") loadFornecedores();
+        if (id === "tab-nova") loadFornecedoresIntoSelect();
+      }
+
+      // ---------- dashboard ----------
+      async function loadDashboard() {
+        document.getElementById("dashSubtitle").textContent = user.is_fiscal
+          ? "Visão geral de todas as notas do sistema."
+          : "Resumo das suas notas.";
+        try {
+          const s = await api("GET", "/notas/stats/");
+          document.getElementById("statTotal").textContent = s.total;
+          document.getElementById("statAnalise").textContent = s.em_analise;
+          document.getElementById("statMes").textContent = s.lancadas_mes;
+          document.getElementById("statLancadas").textContent =
+            s.lancadas_total;
+
+          const data = await api("GET", "/notas/");
+          const list = (data.results || data).slice(0, 5);
+          document.getElementById("dashRecent").innerHTML = list.length
+            ? list
+                .map(
+                  (n) => `
+            <div class="px-4 sm:px-5 py-3 flex items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-slate-900 truncate">NF ${n.numero_nota} — ${n.fornecedor_nome}</p>
+                    <p class="text-xs text-slate-500">${new Date(n.data_criacao).toLocaleString("pt-BR")}</p>
+                </div>
+                ${badgeStatus(n.status)}
+            </div>
+        `,
+                )
+                .join("")
+            : emptyState("Nenhuma nota cadastrada ainda.", "file-text");
+          lucide.createIcons();
+        } catch (e) {
+          showToast(e.message, "error");
+        }
+      }
+
+      // ---------- fornecedores ----------
+      async function loadFornecedoresIntoSelect() {
+        try {
+          const data = await api("GET", "/fornecedores/");
+          const list = data.results || data;
+          const sel = document.getElementById("nf_fornecedor");
+          sel.innerHTML =
+            '<option value="">— selecione um fornecedor —</option>' +
+            list
+              .map(
+                (f) => `<option value="${f.id}">${f.nome} — ${f.cnpj}</option>`,
+              )
+              .join("");
+        } catch (e) {
+          showToast(e.message, "error");
+        }
+      }
+
+      async function loadFornecedores() {
+        try {
+          const data = await api("GET", "/fornecedores/");
+          const list = data.results || data;
+          document.getElementById("fornList").innerHTML = list.length
+            ? list
+                .map(
+                  (f) => `
+            <li class="px-4 sm:px-5 py-3 flex items-center gap-3">
+                <div class="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="building-2" class="w-4 h-4 text-slate-500"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-slate-900 truncate">${f.nome}</p>
+                    <p class="text-xs text-slate-500 font-mono">${f.cnpj}</p>
+                </div>
+            </li>
+        `,
+                )
+                .join("")
+            : `<li>${emptyState("Nenhum fornecedor cadastrado.", "building-2")}</li>`;
+          lucide.createIcons();
+        } catch (e) {
+          showToast(e.message, "error");
+        }
+      }
+
+      document
+        .getElementById("fornForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          try {
+            await api("POST", "/fornecedores/", {
+              cnpj: document.getElementById("forn_cnpj").value,
+              nome: document.getElementById("forn_nome").value,
+            });
+            showToast("Fornecedor cadastrado!", "success");
+            e.target.reset();
+            loadFornecedores();
+          } catch (err) {
+            showToast("Erro: " + err.message, "error");
+          }
+        });
+
+      // ---------- nota fiscal ----------
+      document.getElementById("nf_obs").addEventListener("input", (e) => {
+        document.getElementById("obsCount").textContent =
+          `${e.target.value.length} / 1000`;
+      });
+
+      document
+        .getElementById("notaForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const fd = new FormData();
+          fd.append(
+            "fornecedor",
+            document.getElementById("nf_fornecedor").value,
+          );
+          fd.append("numero_nota", document.getElementById("nf_numero").value);
+          fd.append("chave_acesso", document.getElementById("nf_chave").value);
+          fd.append("pdf_nota", document.getElementById("nf_pdf").files[0]);
+          fd.append("observacao", document.getElementById("nf_obs").value);
+          try {
+            await api("POST", "/notas/", fd, true);
+            showToast("Nota enviada ao setor fiscal!", "success");
+            e.target.reset();
+            document.getElementById("obsCount").textContent = "0 / 1000";
+          } catch (err) {
+            showToast("Erro: " + err.message, "error");
+          }
+        });
+
+      async function loadNotas() {
+        document.getElementById("notasSubtitle").textContent = user.is_fiscal
+          ? "Todas as notas do sistema."
+          : "Notas criadas por você.";
+        const status = document.getElementById("filtroStatus").value;
+        try {
+          const data = await api("GET", "/notas/");
+          let list = data.results || data;
+          if (status) list = list.filter((n) => n.status === status);
+
+          // Tabela (desktop)
+          document.getElementById("notasBody").innerHTML = list.length
+            ? list
+                .map(
+                  (n) => `
+            <tr class="hover:bg-slate-50">
+                <td class="px-4 py-3 font-medium text-slate-900">${n.numero_nota}</td>
+                <td class="px-4 py-3 text-slate-700">${n.fornecedor_nome}</td>
+                <td class="px-4 py-3">${badgeStatus(n.status)}</td>
+                <td class="px-4 py-3 text-slate-600">${new Date(n.data_criacao).toLocaleString("pt-BR")}</td>
+                <td class="px-4 py-3">
+                    <a href="${n.pdf_nota}" target="_blank" class="text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+                        <i data-lucide="external-link" class="w-3.5 h-3.5"></i> abrir
+                    </a>
+                </td>
+                <td class="px-4 py-3 text-right">
+                    ${
+                      user.is_fiscal && n.status !== "lancada"
+                        ? `<button onclick="lancar(${n.id})" class="bg-emerald-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-emerald-700 inline-flex items-center gap-1">
+                              <i data-lucide="check" class="w-3.5 h-3.5"></i> Lançar
+                           </button>`
+                        : '<span class="text-xs text-slate-400">—</span>'
+                    }
+                </td>
+            </tr>
+        `,
+                )
+                .join("")
+            : `<tr><td colspan="6">${emptyState("Nenhuma nota encontrada.", "files")}</td></tr>`;
+
+          // Cards (mobile)
+          document.getElementById("notasCards").innerHTML = list.length
+            ? list
+                .map(
+                  (n) => `
+            <div class="bg-white border border-slate-200 rounded-xl p-4">
+                <div class="flex items-start justify-between gap-3 mb-2">
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-semibold text-slate-900">NF ${n.numero_nota}</p>
+                        <p class="text-sm text-slate-600 truncate">${n.fornecedor_nome}</p>
+                    </div>
+                    ${badgeStatus(n.status)}
+                </div>
+                <p class="text-xs text-slate-500 mb-3">${new Date(n.data_criacao).toLocaleString("pt-BR")}</p>
+                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+                    <a href="${n.pdf_nota}" target="_blank" class="text-sm text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1 px-2 py-1">
+                        <i data-lucide="external-link" class="w-4 h-4"></i> Abrir PDF
+                    </a>
+                    ${
+                      user.is_fiscal && n.status !== "lancada"
+                        ? `<button onclick="lancar(${n.id})" class="ml-auto bg-emerald-600 text-white text-sm rounded-md px-3 py-1.5 hover:bg-emerald-700 inline-flex items-center gap-1">
+                              <i data-lucide="check" class="w-4 h-4"></i> Lançar
+                           </button>`
+                        : ""
+                    }
+                </div>
+            </div>
+        `,
+                )
+                .join("")
+            : emptyState("Nenhuma nota encontrada.", "files");
+
+          lucide.createIcons();
+        } catch (e) {
+          showToast(e.message, "error");
+        }
+      }
+
+      function badgeStatus(s) {
+        const styles = {
+          pendente: "bg-slate-100 text-slate-700",
+          em_analise: "bg-amber-50 text-amber-700 border border-amber-200",
+          lancada: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+        };
+        const label =
+          {
+            pendente: "Pendente",
+            em_analise: "Em análise",
+            lancada: "Lançada",
+          }[s] || s;
+        return `<span class="inline-flex text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${styles[s] || ""}">${label}</span>`;
+      }
+
+      async function lancar(id) {
+        if (!confirm("Confirmar lançamento desta nota?")) return;
+        try {
+          await api("POST", `/notas/${id}/lancar/`, {});
+          showToast("Nota lançada com sucesso!", "success");
+          loadNotas();
+        } catch (e) {
+          showToast("Erro: " + e.message, "error");
+        }
+      }
+
+      // ---------- relatório ----------
+      async function loadRelatorio() {
+        const ano = document.getElementById("rel_ano").value;
+        const mes = document.getElementById("rel_mes").value;
+        let url = `/notas/relatorio/?ano=${ano}`;
+        if (mes) url += `&mes=${mes}`;
+        try {
+          const data = await api("GET", url);
+          const periodo = mes ? `${mes}/${ano}` : ano;
+          document.getElementById("relResult").innerHTML = `
+            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 mb-4">
+                <p class="text-sm text-slate-600 mb-1">Período ${periodo}</p>
+                <p class="text-3xl sm:text-4xl font-semibold text-slate-900">${data.total_lancadas}</p>
+                <p class="text-sm text-slate-500 mt-1">notas lançadas</p>
+            </div>
+            ${
+              data.por_fornecedor.length
+                ? `
+            <div class="bg-white border border-slate-200 rounded-xl">
+                <div class="px-4 sm:px-5 py-4 border-b border-slate-100">
+                    <h3 class="font-semibold text-slate-900">Por fornecedor</h3>
+                </div>
+                <ul class="divide-y divide-slate-100">
+                    ${data.por_fornecedor
+                      .map(
+                        (f) => `
+                        <li class="px-4 sm:px-5 py-3 flex justify-between items-center gap-3">
+                            <span class="text-sm text-slate-800 truncate">${f.fornecedor__nome}</span>
+                            <span class="text-sm font-semibold text-slate-900 flex-shrink-0">${f.total}</span>
+                        </li>
+                    `,
+                      )
+                      .join("")}
+                </ul>
+            </div>`
+                : ""
+            }
+        `;
+        } catch (e) {
+          showToast(e.message, "error");
+        }
+      }
+
+      // ---------- empty state ----------
+      function emptyState(msg, icon) {
+        return `<div class="text-center py-12 px-4">
+        <div class="w-12 h-12 bg-slate-100 rounded-full mx-auto mb-3 flex items-center justify-center">
+            <i data-lucide="${icon}" class="w-5 h-5 text-slate-400"></i>
+        </div>
+        <p class="text-sm text-slate-500">${msg}</p>
+    </div>`;
+      }
+
+      // fechar sidebar ao redimensionar pra desktop
+      window.addEventListener("resize", () => {
+        if (window.innerWidth >= 768) closeSidebar();
+      });
+
+      // ---------- boot ----------
+      lucide.createIcons();
+      if (token && user) showApp();
+    </script>
+  </body>
+</html>
