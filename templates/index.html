@@ -6,25 +6,88 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#4f46e5" />
+    <meta name="theme-color" content="#6e4c34" />
     <title>MacNF — Notas Fiscais</title>
+
+    <!-- Aplica tema salvo ANTES do paint pra evitar flash -->
+    <script>
+      (function () {
+        const saved = localStorage.getItem("macnf_theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        if (saved === "dark" || (!saved && prefersDark)) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: "#faf5f0",
+                100: "#f0e3d6",
+                400: "#a07a5b",
+                500: "#8b6347",
+                600: "#6e4c34",
+                700: "#5a3e2a",
+                800: "#4f3623",
+              },
+            },
+            boxShadow: {
+              soft: "0 1px 2px 0 rgba(0, 0, 0, 0.05), 0 1px 3px 0 rgba(0, 0, 0, 0.06)",
+              "soft-md":
+                "0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.05)",
+              "soft-lg":
+                "0 10px 20px -5px rgba(0, 0, 0, 0.12), 0 4px 8px -2px rgba(0, 0, 0, 0.06)",
+            },
+          },
+        },
+      };
+    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
       body {
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
         -webkit-tap-highlight-color: transparent;
+        background-color: #e7e5e4;
+        transition: background-color 0.2s ease;
       }
+      .dark body {
+        background-color: #0a0a0a;
+      }
+
       .nav-item.active {
-        background-color: #eef2ff;
-        color: #4338ca;
+        background-color: #faf5f0;
+        color: #5a3e2a;
         font-weight: 500;
       }
       .nav-item.active i {
-        color: #4338ca;
+        color: #5a3e2a;
       }
-      /* Botões maiores no mobile pra facilitar o toque */
+      .nav-item:hover {
+        background-color: #f5f5f4;
+      }
+
+      .dark .nav-item.active {
+        background-color: #1c1917;
+        color: #d6b896;
+      }
+      .dark .nav-item.active i {
+        color: #d6b896;
+      }
+      .dark .nav-item:hover {
+        background-color: #262626;
+      }
+
       @media (max-width: 768px) {
         button,
         .btn {
@@ -34,9 +97,8 @@
         select,
         textarea {
           font-size: 16px !important;
-        } /* evita zoom no iOS */
+        }
       }
-      /* Sidebar mobile slide-in */
       .sidebar-mobile {
         transform: translateX(-100%);
         transition: transform 0.25s ease;
@@ -45,56 +107,136 @@
         transform: translateX(0);
       }
       .backdrop {
-        background: rgba(15, 23, 42, 0.5);
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(28px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .login-card {
+        animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .login-bg {
+        animation: fadeIn 0.4s ease-out both;
+      }
+
+      .card-hover {
+        transition:
+          box-shadow 0.2s ease,
+          transform 0.2s ease;
+      }
+      .card-hover:hover {
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      }
+
+      .row-hover:hover {
+        background-color: #f5f5f4;
+      }
+      .dark .row-hover:hover {
+        background-color: #262626;
+      }
+
+      /* Logo: torna mais claro no modo escuro pra ficar legível */
+      .logo-img {
+        filter: none;
+      }
+      .dark .logo-img {
+        filter: brightness(1.3);
       }
     </style>
   </head>
-  <body class="bg-slate-50 text-slate-800">
+  <body class="text-stone-800 dark:text-neutral-100">
     <!-- ============ LOGIN ============ -->
     <div
       id="loginView"
-      class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-100 to-slate-200"
+      class="login-bg min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-stone-200 to-stone-300 dark:from-neutral-950 dark:to-neutral-900"
     >
       <div
-        class="bg-white rounded-xl shadow-lg p-6 sm:p-8 w-full max-w-sm border border-slate-200"
+        class="login-card bg-brand-50 dark:bg-neutral-900 rounded-2xl shadow-soft-lg p-6 sm:p-8 w-full max-w-sm border border-stone-300 dark:border-neutral-800"
       >
-        <div class="flex items-center gap-2 mb-1">
-          <div
-            class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center"
+        <div class="flex items-center justify-between mb-4">
+          <img
+            src="/static/logo.png"
+            alt="MAC Madeiras"
+            class="logo-img h-10 w-auto"
+          />
+          <button
+            onclick="toggleTheme()"
+            type="button"
+            aria-label="Alternar tema"
+            class="p-2 rounded-lg text-stone-500 hover:bg-stone-200 dark:text-neutral-400 dark:hover:bg-neutral-800 transition"
           >
-            <i data-lucide="file-text" class="text-white w-5 h-5"></i>
-          </div>
-          <h1 class="text-2xl font-semibold text-slate-900">MacNF</h1>
+            <i id="themeIcon" data-lucide="moon" class="w-4 h-4"></i>
+          </button>
         </div>
-        <p class="text-sm text-slate-500 mb-6">Gestão de notas fiscais</p>
+        <h1 class="text-2xl font-semibold text-stone-900 dark:text-neutral-100">
+          MacNF
+        </h1>
+        <p class="text-sm text-stone-500 dark:text-neutral-400 mb-6">
+          Gestão de notas fiscais
+        </p>
         <form id="loginForm" class="space-y-4">
           <div>
-            <label class="block text-sm text-slate-700 mb-1.5">Usuário</label>
+            <label
+              class="block text-sm text-stone-700 dark:text-neutral-300 mb-1.5"
+              >Usuário</label
+            >
             <input
               id="username"
               type="text"
               required
               autocomplete="username"
-              class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
             />
           </div>
           <div>
-            <label class="block text-sm text-slate-700 mb-1.5">Senha</label>
-            <input
-              id="password"
-              type="password"
-              required
-              autocomplete="current-password"
-              class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-            />
+            <label
+              class="block text-sm text-stone-700 dark:text-neutral-300 mb-1.5"
+              >Senha</label
+            >
+            <div class="relative">
+              <input
+                id="password"
+                type="password"
+                required
+                autocomplete="current-password"
+                class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg pl-3 pr-10 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+              />
+              <button
+                type="button"
+                id="eyeWrapper"
+                onclick="togglePassword()"
+                aria-label="Mostrar ou ocultar senha"
+                class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-300 rounded-md"
+              >
+                <i data-lucide="eye" class="w-4 h-4"></i>
+              </button>
+            </div>
           </div>
           <div
             id="loginError"
-            class="text-sm text-red-600 hidden bg-red-50 border border-red-200 rounded-lg px-3 py-2"
+            class="text-sm text-red-700 dark:text-red-400 hidden bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 rounded-lg px-3 py-2"
           ></div>
           <button
             type="submit"
-            class="w-full bg-indigo-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-indigo-700 transition"
+            class="w-full bg-brand-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed"
           >
             Entrar
           </button>
@@ -103,117 +245,149 @@
     </div>
 
     <!-- ============ APP ============ -->
-    <div id="mainView" class="hidden min-h-screen md:flex">
-      <!-- Header mobile (visível apenas em telas pequenas) -->
+    <div
+      id="mainView"
+      style="display: none"
+      class="min-h-screen md:h-screen md:flex md:overflow-hidden"
+    >
       <header
-        class="md:hidden sticky top-0 z-30 bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between"
+        class="md:hidden sticky top-0 z-30 bg-brand-50/95 dark:bg-neutral-900/95 backdrop-blur border-b border-stone-300 dark:border-neutral-800 px-4 py-3 flex items-center justify-between"
       >
-        <button onclick="toggleSidebar()" class="p-2 -ml-2 text-slate-700">
+        <button
+          onclick="toggleSidebar()"
+          class="p-2 -ml-2 text-stone-700 dark:text-neutral-300"
+        >
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
-        <div class="flex items-center gap-2">
-          <div
-            class="w-7 h-7 bg-indigo-600 rounded-md flex items-center justify-center"
+        <img src="/static/logo.png" alt="MAC" class="logo-img h-6 w-auto" />
+        <div class="flex items-center gap-1">
+          <button
+            onclick="toggleTheme()"
+            class="p-2 text-stone-600 dark:text-neutral-400"
+            aria-label="Alternar tema"
           >
-            <i data-lucide="file-text" class="text-white w-4 h-4"></i>
-          </div>
-          <span class="font-semibold text-slate-900">MacNF</span>
+            <i id="themeIconMobile" data-lucide="moon" class="w-5 h-5"></i>
+          </button>
+          <button
+            onclick="logout()"
+            class="p-2 -mr-2 text-stone-600 dark:text-neutral-400"
+          >
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+          </button>
         </div>
-        <button onclick="logout()" class="p-2 -mr-2 text-slate-600">
-          <i data-lucide="log-out" class="w-5 h-5"></i>
-        </button>
       </header>
 
-      <!-- Backdrop (visível só quando a sidebar mobile estiver aberta) -->
       <div
         id="sidebarBackdrop"
         onclick="toggleSidebar()"
         class="md:hidden hidden fixed inset-0 z-40 backdrop"
       ></div>
 
-      <!-- Sidebar -->
       <aside
         id="sidebar"
-        class="sidebar-mobile md:transform-none fixed md:static inset-y-0 left-0 z-50 w-64 md:w-60 bg-white border-r border-slate-200 flex flex-col"
+        class="sidebar-mobile md:transform-none fixed md:static inset-y-0 left-0 z-50 w-64 md:w-60 bg-brand-50 dark:bg-neutral-900 border-r border-stone-300 dark:border-neutral-800 flex flex-col"
       >
         <div
-          class="px-5 py-5 border-b border-slate-100 flex items-center justify-between"
+          class="px-5 py-5 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between"
         >
-          <div class="flex items-center gap-2">
-            <div
-              class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center"
+          <img
+            src="/static/logo.png"
+            alt="MAC Madeiras"
+            class="logo-img h-8 w-auto"
+          />
+          <div class="flex items-center gap-1">
+            <button
+              onclick="toggleTheme()"
+              class="hidden md:block p-1.5 text-stone-500 hover:text-stone-800 dark:text-neutral-400 dark:hover:text-neutral-200 rounded-md hover:bg-stone-200 dark:hover:bg-neutral-800 transition"
+              aria-label="Alternar tema"
             >
-              <i data-lucide="file-text" class="text-white w-4 h-4"></i>
-            </div>
-            <span class="font-semibold text-slate-900">MacNF</span>
+              <i id="themeIconDesktop" data-lucide="moon" class="w-4 h-4"></i>
+            </button>
+            <button
+              onclick="toggleSidebar()"
+              class="md:hidden p-1 text-stone-500 dark:text-neutral-400"
+            >
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
           </div>
-          <button
-            onclick="toggleSidebar()"
-            class="md:hidden p-1 text-slate-500"
-          >
-            <i data-lucide="x" class="w-5 h-5"></i>
-          </button>
         </div>
 
         <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
           <button
             onclick="showTab('tab-dashboard')"
             data-tab="tab-dashboard"
-            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300"
           >
             <i
               data-lucide="layout-dashboard"
-              class="w-4 h-4 text-slate-500"
+              class="w-4 h-4 text-stone-500 dark:text-neutral-500"
             ></i>
             Painel
           </button>
           <button
             onclick="showTab('tab-nova')"
             data-tab="tab-nova"
-            class="nav-item estoquista-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+            class="nav-item estoquista-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300"
           >
-            <i data-lucide="file-plus" class="w-4 h-4 text-slate-500"></i>
+            <i
+              data-lucide="file-plus"
+              class="w-4 h-4 text-stone-500 dark:text-neutral-500"
+            ></i>
             Nova nota
           </button>
           <button
             onclick="showTab('tab-notas')"
             data-tab="tab-notas"
-            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300"
           >
-            <i data-lucide="files" class="w-4 h-4 text-slate-500"></i>
+            <i
+              data-lucide="files"
+              class="w-4 h-4 text-stone-500 dark:text-neutral-500"
+            ></i>
             Notas fiscais
           </button>
           <button
             onclick="showTab('tab-relatorio')"
             data-tab="tab-relatorio"
-            class="nav-item fiscal-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+            class="nav-item fiscal-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300"
           >
-            <i data-lucide="bar-chart-3" class="w-4 h-4 text-slate-500"></i>
+            <i
+              data-lucide="bar-chart-3"
+              class="w-4 h-4 text-stone-500 dark:text-neutral-500"
+            ></i>
             Relatórios
           </button>
           <button
             onclick="showTab('tab-fornecedor')"
             data-tab="tab-fornecedor"
-            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-700 hover:bg-slate-100"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300"
           >
-            <i data-lucide="building-2" class="w-4 h-4 text-slate-500"></i>
+            <i
+              data-lucide="building-2"
+              class="w-4 h-4 text-stone-500 dark:text-neutral-500"
+            ></i>
             Fornecedores
           </button>
         </nav>
 
-        <div class="p-3 border-t border-slate-100">
+        <div
+          class="p-3 border-t border-stone-300 dark:border-neutral-800 bg-stone-100 dark:bg-neutral-950/50"
+        >
           <div class="flex items-center justify-between px-2 py-1">
             <div class="min-w-0">
               <p
-                class="text-sm font-medium text-slate-800 truncate"
+                class="text-sm font-medium text-stone-800 dark:text-neutral-200 truncate"
                 id="userName"
               ></p>
-              <p class="text-xs text-slate-500" id="userRole"></p>
+              <p
+                class="text-xs text-stone-500 dark:text-neutral-400"
+                id="userRole"
+              ></p>
             </div>
             <button
               onclick="logout()"
               title="Sair"
-              class="hidden md:block text-slate-400 hover:text-slate-700 p-1"
+              class="hidden md:block text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-300 p-1"
             >
               <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
@@ -221,66 +395,113 @@
         </div>
       </aside>
 
-      <!-- Main content -->
-      <main class="flex-1 overflow-auto">
+      <main class="flex-1 md:overflow-y-auto bg-stone-200 dark:bg-neutral-950">
         <!-- ===== Dashboard ===== -->
         <section id="tab-dashboard" class="tab hidden p-4 sm:p-6 lg:p-8">
-          <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 mb-1">
+          <h2
+            class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
+          >
             Painel
           </h2>
-          <p class="text-sm text-slate-500 mb-5 sm:mb-6" id="dashSubtitle"></p>
+          <p
+            class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6"
+            id="dashSubtitle"
+          ></p>
 
           <div
             class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
           >
-            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+            <div
+              class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
+            >
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs sm:text-sm text-slate-600">Total</span>
-                <i data-lucide="files" class="w-4 h-4 text-slate-400"></i>
+                <span
+                  class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
+                  >Total</span
+                >
+                <div
+                  class="w-7 h-7 rounded-lg bg-stone-200 dark:bg-neutral-800 flex items-center justify-center"
+                >
+                  <i
+                    data-lucide="files"
+                    class="w-3.5 h-3.5 text-stone-500 dark:text-neutral-400"
+                  ></i>
+                </div>
               </div>
               <p
-                class="text-2xl sm:text-3xl font-semibold text-slate-900"
+                class="text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-neutral-100"
                 id="statTotal"
               >
                 —
               </p>
             </div>
-            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+            <div
+              class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
+            >
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs sm:text-sm text-slate-600"
+                <span
+                  class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
                   >Em análise</span
                 >
-                <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+                <div
+                  class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center"
+                >
+                  <i
+                    data-lucide="clock"
+                    class="w-3.5 h-3.5 text-amber-700 dark:text-amber-400"
+                  ></i>
+                </div>
               </div>
               <p
-                class="text-2xl sm:text-3xl font-semibold text-amber-600"
+                class="text-2xl sm:text-3xl font-semibold text-amber-700 dark:text-amber-400"
                 id="statAnalise"
               >
                 —
               </p>
             </div>
-            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+            <div
+              class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
+            >
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs sm:text-sm text-slate-600">No mês</span>
-                <i
-                  data-lucide="check-circle-2"
-                  class="w-4 h-4 text-emerald-500"
-                ></i>
+                <span
+                  class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
+                  >No mês</span
+                >
+                <div
+                  class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center"
+                >
+                  <i
+                    data-lucide="check-circle-2"
+                    class="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400"
+                  ></i>
+                </div>
               </div>
               <p
-                class="text-2xl sm:text-3xl font-semibold text-emerald-600"
+                class="text-2xl sm:text-3xl font-semibold text-emerald-700 dark:text-emerald-400"
                 id="statMes"
               >
                 —
               </p>
             </div>
-            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-5">
+            <div
+              class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
+            >
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs sm:text-sm text-slate-600">Lançadas</span>
-                <i data-lucide="check-check" class="w-4 h-4 text-slate-400"></i>
+                <span
+                  class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
+                  >Lançadas</span
+                >
+                <div
+                  class="w-7 h-7 rounded-lg bg-brand-100 dark:bg-brand-800/30 flex items-center justify-center"
+                >
+                  <i
+                    data-lucide="check-check"
+                    class="w-3.5 h-3.5 text-brand-600 dark:text-brand-400"
+                  ></i>
+                </div>
               </div>
               <p
-                class="text-2xl sm:text-3xl font-semibold text-slate-900"
+                class="text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-neutral-100"
                 id="statLancadas"
               >
                 —
@@ -288,19 +509,26 @@
             </div>
           </div>
 
-          <div class="bg-white border border-slate-200 rounded-xl">
+          <div
+            class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl shadow-soft"
+          >
             <div
-              class="px-4 sm:px-5 py-4 border-b border-slate-100 flex items-center justify-between"
+              class="px-4 sm:px-5 py-4 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between"
             >
-              <h3 class="font-semibold text-slate-900">Notas recentes</h3>
+              <h3 class="font-semibold text-stone-900 dark:text-neutral-100">
+                Notas recentes
+              </h3>
               <button
                 onclick="showTab('tab-notas')"
-                class="text-sm text-indigo-600 hover:text-indigo-700"
+                class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
               >
                 Ver todas →
               </button>
             </div>
-            <div id="dashRecent" class="divide-y divide-slate-100"></div>
+            <div
+              id="dashRecent"
+              class="divide-y divide-stone-200 dark:divide-neutral-800"
+            ></div>
           </div>
         </section>
 
@@ -309,30 +537,34 @@
           id="tab-nova"
           class="tab hidden estoquista-only p-4 sm:p-6 lg:p-8"
         >
-          <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 mb-1">
+          <h2
+            class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
+          >
             Cadastrar nota fiscal
           </h2>
-          <p class="text-sm text-slate-500 mb-5 sm:mb-6">
+          <p class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6">
             Preencha os dados e envie ao setor fiscal.
           </p>
 
           <form
             id="notaForm"
-            class="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 max-w-3xl"
+            class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 max-w-3xl shadow-soft"
           >
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                <label
+                  class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
                   >Fornecedor</label
                 >
                 <select
                   id="nf_fornecedor"
                   required
-                  class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
                 ></select>
               </div>
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                <label
+                  class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
                   >Número da nota</label
                 >
                 <input
@@ -340,11 +572,12 @@
                   type="text"
                   inputmode="numeric"
                   required
-                  class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
                 />
               </div>
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                <label
+                  class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
                   >Chave de acesso</label
                 >
                 <input
@@ -354,31 +587,34 @@
                   maxlength="44"
                   required
                   placeholder="44 dígitos"
-                  class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm font-mono text-stone-900 dark:text-neutral-100 placeholder-stone-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
                 />
               </div>
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                <label
+                  class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
                   >PDF da nota</label
                 >
                 <div
-                  class="border-2 border-dashed border-slate-300 rounded-lg p-4 hover:border-indigo-400 transition"
+                  class="border-2 border-dashed border-stone-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 rounded-lg p-4 hover:border-brand-400 transition"
                 >
                   <input
                     id="nf_pdf"
                     type="file"
                     accept="application/pdf,.pdf"
                     required
-                    class="w-full text-sm"
+                    class="w-full text-sm text-stone-700 dark:text-neutral-300"
                   />
                 </div>
               </div>
               <div class="md:col-span-2">
                 <label
-                  class="flex justify-between text-sm font-medium text-slate-700 mb-1.5"
+                  class="flex justify-between text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
                 >
                   <span>Observação</span>
-                  <span class="text-xs text-slate-400" id="obsCount"
+                  <span
+                    class="text-xs text-stone-400 dark:text-neutral-500"
+                    id="obsCount"
                     >0 / 1000</span
                   >
                 </label>
@@ -386,21 +622,21 @@
                   id="nf_obs"
                   maxlength="1000"
                   rows="3"
-                  class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
                 ></textarea>
               </div>
             </div>
             <div class="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
               <button
                 type="submit"
-                class="w-full sm:w-auto bg-indigo-600 text-white rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+                class="w-full sm:w-auto bg-brand-600 text-white rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <i data-lucide="send" class="w-4 h-4"></i>
                 Salvar e enviar ao fiscal
               </button>
               <button
                 type="reset"
-                class="text-sm text-slate-600 hover:text-slate-900 py-2"
+                class="text-sm text-stone-600 hover:text-stone-900 dark:text-neutral-400 dark:hover:text-neutral-200 py-2"
               >
                 Limpar
               </button>
@@ -414,15 +650,20 @@
             class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6"
           >
             <div>
-              <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 mb-1">
+              <h2
+                class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
+              >
                 Notas fiscais
               </h2>
-              <p class="text-sm text-slate-500" id="notasSubtitle"></p>
+              <p
+                class="text-sm text-stone-500 dark:text-neutral-400"
+                id="notasSubtitle"
+              ></p>
             </div>
             <select
               id="filtroStatus"
               onchange="loadNotas()"
-              class="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white"
+              class="border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm bg-brand-50 dark:bg-neutral-900 text-stone-900 dark:text-neutral-100 shadow-soft"
             >
               <option value="">Todos os status</option>
               <option value="em_analise">Em análise</option>
@@ -430,30 +671,32 @@
             </select>
           </div>
 
-          <!-- Tabela (desktop ≥ md) -->
           <div
-            class="hidden md:block bg-white border border-slate-200 rounded-xl overflow-hidden"
+            class="hidden md:block bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl overflow-hidden shadow-soft"
           >
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
                 <thead
-                  class="text-left text-xs uppercase text-slate-500 bg-slate-50 border-b border-slate-200"
+                  class="text-left text-xs uppercase text-stone-500 dark:text-neutral-400 bg-stone-100 dark:bg-neutral-950/50 border-b border-stone-300 dark:border-neutral-800"
                 >
                   <tr>
                     <th class="px-4 py-3 font-medium">Número</th>
                     <th class="px-4 py-3 font-medium">Fornecedor</th>
                     <th class="px-4 py-3 font-medium">Status</th>
-                    <th class="px-4 py-3 font-medium">Criada em</th>
+                    <th class="px-4 py-3 font-medium">Criação</th>
+                    <th class="px-4 py-3 font-medium">Lançamento</th>
                     <th class="px-4 py-3 font-medium">PDF</th>
                     <th class="px-4 py-3 font-medium text-right">Ações</th>
                   </tr>
                 </thead>
-                <tbody id="notasBody" class="divide-y divide-slate-100"></tbody>
+                <tbody
+                  id="notasBody"
+                  class="divide-y divide-stone-200 dark:divide-neutral-800"
+                ></tbody>
               </table>
             </div>
           </div>
 
-          <!-- Cards (mobile < md) -->
           <div id="notasCards" class="md:hidden space-y-3"></div>
         </section>
 
@@ -462,37 +705,41 @@
           id="tab-relatorio"
           class="tab hidden fiscal-only p-4 sm:p-6 lg:p-8"
         >
-          <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 mb-1">
+          <h2
+            class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
+          >
             Relatórios
           </h2>
-          <p class="text-sm text-slate-500 mb-5 sm:mb-6">
+          <p class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6">
             Notas lançadas por período.
           </p>
 
           <div
-            class="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 mb-6"
+            class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 mb-6 shadow-soft"
           >
             <div
               class="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 sm:items-end"
             >
               <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1.5"
+                <label
+                  class="block text-xs font-medium text-stone-600 dark:text-neutral-400 mb-1.5"
                   >Ano</label
                 >
                 <input
                   id="rel_ano"
                   type="number"
                   value="2026"
-                  class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm sm:w-28"
+                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm sm:w-28 text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 transition"
                 />
               </div>
               <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1.5"
+                <label
+                  class="block text-xs font-medium text-stone-600 dark:text-neutral-400 mb-1.5"
                   >Mês</label
                 >
                 <select
                   id="rel_mes"
-                  class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white sm:w-40"
+                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm sm:w-40 text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 transition"
                 >
                   <option value="">Todos</option>
                   <option value="1">Janeiro</option>
@@ -511,7 +758,7 @@
               </div>
               <button
                 onclick="loadRelatorio()"
-                class="col-span-2 sm:col-span-1 bg-indigo-600 text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+                class="col-span-2 sm:col-span-1 bg-brand-600 text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 <i data-lucide="play" class="w-4 h-4"></i>
                 Gerar
@@ -524,21 +771,28 @@
 
         <!-- ===== Fornecedores ===== -->
         <section id="tab-fornecedor" class="tab hidden p-4 sm:p-6 lg:p-8">
-          <h2 class="text-xl sm:text-2xl font-semibold text-slate-900 mb-1">
+          <h2
+            class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
+          >
             Fornecedores
           </h2>
-          <p class="text-sm text-slate-500 mb-5 sm:mb-6">
+          <p class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6">
             Cadastre os fornecedores que emitem suas notas.
           </p>
 
           <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
             <div
-              class="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-4 sm:p-6 self-start"
+              class="lg:col-span-2 bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 self-start shadow-soft"
             >
-              <h3 class="font-semibold text-slate-900 mb-4">Novo fornecedor</h3>
+              <h3
+                class="font-semibold text-stone-900 dark:text-neutral-100 mb-4"
+              >
+                Novo fornecedor
+              </h3>
               <form id="fornForm" class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                  <label
+                    class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
                     >CNPJ</label
                   >
                   <input
@@ -547,23 +801,24 @@
                     inputmode="numeric"
                     required
                     placeholder="00.000.000/0000-00"
-                    class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm font-mono focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm font-mono text-stone-900 dark:text-neutral-100 placeholder-stone-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
                   />
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-1.5"
+                  <label
+                    class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
                     >Nome / razão social</label
                   >
                   <input
                     id="forn_nome"
                     type="text"
                     required
-                    class="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
                   />
                 </div>
                 <button
                   type="submit"
-                  class="w-full bg-indigo-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-indigo-700 transition"
+                  class="w-full bg-brand-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   Cadastrar
                 </button>
@@ -571,12 +826,19 @@
             </div>
 
             <div
-              class="lg:col-span-3 bg-white border border-slate-200 rounded-xl"
+              class="lg:col-span-3 bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl shadow-soft"
             >
-              <div class="px-4 sm:px-5 py-4 border-b border-slate-100">
-                <h3 class="font-semibold text-slate-900">Cadastrados</h3>
+              <div
+                class="px-4 sm:px-5 py-4 border-b border-stone-300 dark:border-neutral-800"
+              >
+                <h3 class="font-semibold text-stone-900 dark:text-neutral-100">
+                  Cadastrados
+                </h3>
               </div>
-              <ul id="fornList" class="divide-y divide-slate-100"></ul>
+              <ul
+                id="fornList"
+                class="divide-y divide-stone-200 dark:divide-neutral-800"
+              ></ul>
             </div>
           </div>
         </section>
@@ -590,7 +852,7 @@
     >
       <div
         id="toastBox"
-        class="bg-slate-900 text-white text-sm rounded-lg px-4 py-3 shadow-lg flex items-center gap-2 max-w-sm"
+        class="bg-stone-900 dark:bg-neutral-100 text-white dark:text-neutral-900 text-sm rounded-lg px-4 py-3 shadow-soft-lg flex items-center gap-2 max-w-sm"
       ></div>
     </div>
 
@@ -598,25 +860,61 @@
       const API = window.location.origin + "/api";
       let token = localStorage.getItem("macnf_token");
       let user = JSON.parse(localStorage.getItem("macnf_user") || "null");
+      let fornecedoresCache = null;
+      let ultimoRelatorio = null;
 
-      // ---------- mobile sidebar ----------
-      function toggleSidebar() {
-        const sb = document.getElementById("sidebar");
-        const bd = document.getElementById("sidebarBackdrop");
-        sb.classList.toggle("open");
-        bd.classList.toggle("hidden");
+      // ---------- tema ----------
+      function isDark() {
+        return document.documentElement.classList.contains("dark");
       }
-      function closeSidebar() {
-        document.getElementById("sidebar").classList.remove("open");
-        document.getElementById("sidebarBackdrop").classList.add("hidden");
+      function updateThemeIcons() {
+        const iconName = isDark() ? "sun" : "moon";
+        ["themeIcon", "themeIconMobile", "themeIconDesktop"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el)
+            el.outerHTML = `<i id="${id}" data-lucide="${iconName}" class="${el.className}"></i>`;
+        });
+        lucide.createIcons();
+      }
+      function toggleTheme() {
+        const newDark = !isDark();
+        document.documentElement.classList.toggle("dark", newDark);
+        localStorage.setItem("macnf_theme", newDark ? "dark" : "light");
+        updateThemeIcons();
       }
 
       // ---------- helpers ----------
+      function fmtDate(s) {
+        if (!s) return "—";
+        return new Date(s).toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+      function statusLabel(s) {
+        return (
+          {
+            pendente: "Pendente",
+            em_analise: "Em análise",
+            lancada: "Lançada",
+          }[s] || s
+        );
+      }
+      function setBtnLoading(btn, loading) {
+        if (!btn) return;
+        btn.disabled = loading;
+        btn.classList.toggle("opacity-60", loading);
+        btn.classList.toggle("cursor-not-allowed", loading);
+      }
+
       function showToast(msg, type = "info") {
         const colors = {
-          info: "bg-slate-900",
-          success: "bg-emerald-600",
-          error: "bg-red-600",
+          info: "bg-stone-900 dark:bg-neutral-100 text-white dark:text-neutral-900",
+          success: "bg-emerald-600 text-white",
+          error: "bg-red-600 text-white",
         };
         const icons = {
           info: "info",
@@ -624,7 +922,7 @@
           error: "alert-circle",
         };
         const box = document.getElementById("toastBox");
-        box.className = `${colors[type]} text-white text-sm rounded-lg px-4 py-3 shadow-lg flex items-center gap-2 max-w-sm`;
+        box.className = `${colors[type]} text-sm rounded-lg px-4 py-3 shadow-soft-lg flex items-center gap-2 max-w-sm`;
         box.innerHTML = `<i data-lucide="${icons[type]}" class="w-4 h-4 flex-shrink-0"></i><span>${msg}</span>`;
         document.getElementById("toast").classList.remove("hidden");
         lucide.createIcons();
@@ -646,20 +944,44 @@
           }
         }
         const res = await fetch(API + path, { method, headers, body });
-        if (!res.ok) {
-          const txt = await res.text();
-          throw new Error(txt || res.statusText);
-        }
+        if (!res.ok) throw new Error((await res.text()) || res.statusText);
         return res.status === 204 ? null : res.json();
       }
 
-      // ---------- login ----------
+      async function getFornecedores(force = false) {
+        if (!fornecedoresCache || force) {
+          const data = await api("GET", "/fornecedores/");
+          fornecedoresCache = data.results || data;
+        }
+        return fornecedoresCache;
+      }
+
+      function toggleSidebar() {
+        document.getElementById("sidebar").classList.toggle("open");
+        document.getElementById("sidebarBackdrop").classList.toggle("hidden");
+      }
+      function closeSidebar() {
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("sidebarBackdrop").classList.add("hidden");
+      }
+
+      function togglePassword() {
+        const inp = document.getElementById("password");
+        const wrapper = document.getElementById("eyeWrapper");
+        const isPwd = inp.type === "password";
+        inp.type = isPwd ? "text" : "password";
+        wrapper.innerHTML = `<i data-lucide="${isPwd ? "eye-off" : "eye"}" class="w-4 h-4"></i>`;
+        lucide.createIcons();
+      }
+
       document
         .getElementById("loginForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
+          const btn = e.target.querySelector('button[type="submit"]');
           const err = document.getElementById("loginError");
           err.classList.add("hidden");
+          setBtnLoading(btn, true);
           try {
             const res = await fetch(API + "/login/", {
               method: "POST",
@@ -679,6 +1001,8 @@
           } catch (e) {
             err.textContent = e.message;
             err.classList.remove("hidden");
+          } finally {
+            setBtnLoading(btn, false);
           }
         });
 
@@ -687,13 +1011,14 @@
         localStorage.removeItem("macnf_user");
         token = null;
         user = null;
-        document.getElementById("mainView").classList.add("hidden");
+        fornecedoresCache = null;
+        document.getElementById("mainView").style.display = "none";
         document.getElementById("loginView").classList.remove("hidden");
       }
 
       function showApp() {
         document.getElementById("loginView").classList.add("hidden");
-        document.getElementById("mainView").classList.remove("hidden");
+        document.getElementById("mainView").style.display = "";
         document.getElementById("userName").textContent = user.username;
         document.getElementById("userRole").textContent = user.is_fiscal
           ? "Setor fiscal"
@@ -707,10 +1032,10 @@
         });
 
         lucide.createIcons();
+        updateThemeIcons();
         showTab("tab-dashboard");
       }
 
-      // ---------- nav ----------
       function showTab(id) {
         document
           .querySelectorAll(".tab")
@@ -719,14 +1044,13 @@
         document
           .querySelectorAll(".nav-item")
           .forEach((b) => b.classList.toggle("active", b.dataset.tab === id));
-        closeSidebar(); // fecha a sidebar mobile ao navegar
+        closeSidebar();
         if (id === "tab-dashboard") loadDashboard();
         if (id === "tab-notas") loadNotas();
         if (id === "tab-fornecedor") loadFornecedores();
         if (id === "tab-nova") loadFornecedoresIntoSelect();
       }
 
-      // ---------- dashboard ----------
       async function loadDashboard() {
         document.getElementById("dashSubtitle").textContent = user.is_fiscal
           ? "Visão geral de todas as notas do sistema."
@@ -745,10 +1069,10 @@
             ? list
                 .map(
                   (n) => `
-            <div class="px-4 sm:px-5 py-3 flex items-center justify-between gap-3">
+            <div class="px-4 sm:px-5 py-3 flex items-center justify-between gap-3 row-hover">
                 <div class="min-w-0 flex-1">
-                    <p class="text-sm font-medium text-slate-900 truncate">NF ${n.numero_nota} — ${n.fornecedor_nome}</p>
-                    <p class="text-xs text-slate-500">${new Date(n.data_criacao).toLocaleString("pt-BR")}</p>
+                    <p class="text-sm font-medium text-stone-900 dark:text-neutral-100 truncate">NF ${n.numero_nota} — ${n.fornecedor_nome}</p>
+                    <p class="text-xs text-stone-500 dark:text-neutral-400">por <span class="font-medium">${n.criado_por}</span> • ${fmtDate(n.data_criacao)}</p>
                 </div>
                 ${badgeStatus(n.status)}
             </div>
@@ -762,11 +1086,9 @@
         }
       }
 
-      // ---------- fornecedores ----------
       async function loadFornecedoresIntoSelect() {
         try {
-          const data = await api("GET", "/fornecedores/");
-          const list = data.results || data;
+          const list = await getFornecedores();
           const sel = document.getElementById("nf_fornecedor");
           sel.innerHTML =
             '<option value="">— selecione um fornecedor —</option>' +
@@ -782,19 +1104,18 @@
 
       async function loadFornecedores() {
         try {
-          const data = await api("GET", "/fornecedores/");
-          const list = data.results || data;
+          const list = await getFornecedores();
           document.getElementById("fornList").innerHTML = list.length
             ? list
                 .map(
                   (f) => `
-            <li class="px-4 sm:px-5 py-3 flex items-center gap-3">
-                <div class="w-9 h-9 bg-slate-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <i data-lucide="building-2" class="w-4 h-4 text-slate-500"></i>
+            <li class="px-4 sm:px-5 py-3 flex items-center gap-3 row-hover">
+                <div class="w-10 h-10 bg-brand-100 dark:bg-brand-800/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="building-2" class="w-4 h-4 text-brand-600 dark:text-brand-400"></i>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="text-sm font-medium text-slate-900 truncate">${f.nome}</p>
-                    <p class="text-xs text-slate-500 font-mono">${f.cnpj}</p>
+                    <p class="text-sm font-medium text-stone-900 dark:text-neutral-100 truncate">${f.nome}</p>
+                    <p class="text-xs text-stone-500 dark:text-neutral-400 font-mono">${f.cnpj}</p>
                 </div>
             </li>
         `,
@@ -811,6 +1132,8 @@
         .getElementById("fornForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
+          const btn = e.target.querySelector('button[type="submit"]');
+          setBtnLoading(btn, true);
           try {
             await api("POST", "/fornecedores/", {
               cnpj: document.getElementById("forn_cnpj").value,
@@ -818,13 +1141,15 @@
             });
             showToast("Fornecedor cadastrado!", "success");
             e.target.reset();
+            fornecedoresCache = null;
             loadFornecedores();
           } catch (err) {
             showToast("Erro: " + err.message, "error");
+          } finally {
+            setBtnLoading(btn, false);
           }
         });
 
-      // ---------- nota fiscal ----------
       document.getElementById("nf_obs").addEventListener("input", (e) => {
         document.getElementById("obsCount").textContent =
           `${e.target.value.length} / 1000`;
@@ -834,6 +1159,8 @@
         .getElementById("notaForm")
         .addEventListener("submit", async (e) => {
           e.preventDefault();
+          const btn = e.target.querySelector('button[type="submit"]');
+          setBtnLoading(btn, true);
           const fd = new FormData();
           fd.append(
             "fornecedor",
@@ -850,6 +1177,8 @@
             document.getElementById("obsCount").textContent = "0 / 1000";
           } catch (err) {
             showToast("Erro: " + err.message, "error");
+          } finally {
+            setBtnLoading(btn, false);
           }
         });
 
@@ -863,57 +1192,83 @@
           let list = data.results || data;
           if (status) list = list.filter((n) => n.status === status);
 
-          // Tabela (desktop)
           document.getElementById("notasBody").innerHTML = list.length
             ? list
                 .map(
                   (n) => `
-            <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3 font-medium text-slate-900">${n.numero_nota}</td>
-                <td class="px-4 py-3 text-slate-700">${n.fornecedor_nome}</td>
-                <td class="px-4 py-3">${badgeStatus(n.status)}</td>
-                <td class="px-4 py-3 text-slate-600">${new Date(n.data_criacao).toLocaleString("pt-BR")}</td>
-                <td class="px-4 py-3">
-                    <a href="${n.pdf_nota}" target="_blank" class="text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1">
+            <tr class="row-hover">
+                <td class="px-4 py-3 font-medium text-stone-900 dark:text-neutral-100 align-top">${n.numero_nota}</td>
+                <td class="px-4 py-3 text-stone-700 dark:text-neutral-300 align-top">${n.fornecedor_nome}</td>
+                <td class="px-4 py-3 align-top">${badgeStatus(n.status)}</td>
+                <td class="px-4 py-3 align-top">
+                    <div class="text-stone-700 dark:text-neutral-300">${fmtDate(n.data_criacao)}</div>
+                    <div class="text-xs text-stone-500 dark:text-neutral-500">por ${n.criado_por}</div>
+                </td>
+                <td class="px-4 py-3 align-top">
+                    ${
+                      n.data_lancamento
+                        ? `
+                        <div class="text-stone-700 dark:text-neutral-300">${fmtDate(n.data_lancamento)}</div>
+                        <div class="text-xs text-stone-500 dark:text-neutral-500">por ${n.lancada_por}</div>
+                    `
+                        : '<span class="text-xs text-stone-400 dark:text-neutral-500">—</span>'
+                    }
+                </td>
+                <td class="px-4 py-3 align-top">
+                    <a href="${n.pdf_nota}" target="_blank" class="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 inline-flex items-center gap-1">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i> abrir
                     </a>
                 </td>
-                <td class="px-4 py-3 text-right">
+                <td class="px-4 py-3 text-right align-top">
                     ${
                       user.is_fiscal && n.status !== "lancada"
-                        ? `<button onclick="lancar(${n.id})" class="bg-emerald-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-emerald-700 inline-flex items-center gap-1">
+                        ? `<button onclick="lancar(${n.id})" class="bg-emerald-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-emerald-700 shadow-soft inline-flex items-center gap-1">
                               <i data-lucide="check" class="w-3.5 h-3.5"></i> Lançar
                            </button>`
-                        : '<span class="text-xs text-slate-400">—</span>'
+                        : '<span class="text-xs text-stone-400 dark:text-neutral-500">—</span>'
                     }
                 </td>
             </tr>
         `,
                 )
                 .join("")
-            : `<tr><td colspan="6">${emptyState("Nenhuma nota encontrada.", "files")}</td></tr>`;
+            : `<tr><td colspan="7">${emptyState("Nenhuma nota encontrada.", "files")}</td></tr>`;
 
-          // Cards (mobile)
           document.getElementById("notasCards").innerHTML = list.length
             ? list
                 .map(
                   (n) => `
-            <div class="bg-white border border-slate-200 rounded-xl p-4">
+            <div class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 shadow-soft">
                 <div class="flex items-start justify-between gap-3 mb-2">
                     <div class="min-w-0 flex-1">
-                        <p class="text-sm font-semibold text-slate-900">NF ${n.numero_nota}</p>
-                        <p class="text-sm text-slate-600 truncate">${n.fornecedor_nome}</p>
+                        <p class="text-sm font-semibold text-stone-900 dark:text-neutral-100">NF ${n.numero_nota}</p>
+                        <p class="text-sm text-stone-600 dark:text-neutral-400 truncate">${n.fornecedor_nome}</p>
                     </div>
                     ${badgeStatus(n.status)}
                 </div>
-                <p class="text-xs text-slate-500 mb-3">${new Date(n.data_criacao).toLocaleString("pt-BR")}</p>
-                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-                    <a href="${n.pdf_nota}" target="_blank" class="text-sm text-indigo-600 hover:text-indigo-700 inline-flex items-center gap-1 px-2 py-1">
+                <div class="space-y-1.5 py-2 text-xs">
+                    <div class="flex items-start gap-2 text-stone-600 dark:text-neutral-400">
+                        <i data-lucide="file-plus" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-stone-400 dark:text-neutral-500"></i>
+                        <span>Criada por <span class="font-medium text-stone-800 dark:text-neutral-200">${n.criado_por}</span> em ${fmtDate(n.data_criacao)}</span>
+                    </div>
+                    ${
+                      n.data_lancamento
+                        ? `
+                        <div class="flex items-start gap-2 text-stone-600 dark:text-neutral-400">
+                            <i data-lucide="check-circle-2" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-emerald-500"></i>
+                            <span>Lançada por <span class="font-medium text-stone-800 dark:text-neutral-200">${n.lancada_por}</span> em ${fmtDate(n.data_lancamento)}</span>
+                        </div>
+                    `
+                        : ""
+                    }
+                </div>
+                <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-stone-200 dark:border-neutral-800">
+                    <a href="${n.pdf_nota}" target="_blank" class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 inline-flex items-center gap-1 px-2 py-1">
                         <i data-lucide="external-link" class="w-4 h-4"></i> Abrir PDF
                     </a>
                     ${
                       user.is_fiscal && n.status !== "lancada"
-                        ? `<button onclick="lancar(${n.id})" class="ml-auto bg-emerald-600 text-white text-sm rounded-md px-3 py-1.5 hover:bg-emerald-700 inline-flex items-center gap-1">
+                        ? `<button onclick="lancar(${n.id})" class="ml-auto bg-emerald-600 text-white text-sm rounded-md px-3 py-1.5 hover:bg-emerald-700 shadow-soft inline-flex items-center gap-1">
                               <i data-lucide="check" class="w-4 h-4"></i> Lançar
                            </button>`
                         : ""
@@ -933,17 +1288,14 @@
 
       function badgeStatus(s) {
         const styles = {
-          pendente: "bg-slate-100 text-slate-700",
-          em_analise: "bg-amber-50 text-amber-700 border border-amber-200",
-          lancada: "bg-emerald-50 text-emerald-700 border border-emerald-200",
+          pendente:
+            "bg-stone-200 text-stone-700 border border-stone-300 dark:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-700",
+          em_analise:
+            "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900",
+          lancada:
+            "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900",
         };
-        const label =
-          {
-            pendente: "Pendente",
-            em_analise: "Em análise",
-            lancada: "Lançada",
-          }[s] || s;
-        return `<span class="inline-flex text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${styles[s] || ""}">${label}</span>`;
+        return `<span class="inline-flex text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${styles[s] || ""}">${statusLabel(s)}</span>`;
       }
 
       async function lancar(id) {
@@ -957,7 +1309,6 @@
         }
       }
 
-      // ---------- relatório ----------
       async function loadRelatorio() {
         const ano = document.getElementById("rel_ano").value;
         const mes = document.getElementById("rel_mes").value;
@@ -965,27 +1316,37 @@
         if (mes) url += `&mes=${mes}`;
         try {
           const data = await api("GET", url);
+          ultimoRelatorio = data;
           const periodo = mes ? `${mes}/${ano}` : ano;
+          const podeExportar = data.notas && data.notas.length > 0;
+
           document.getElementById("relResult").innerHTML = `
-            <div class="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 mb-4">
-                <p class="text-sm text-slate-600 mb-1">Período ${periodo}</p>
-                <p class="text-3xl sm:text-4xl font-semibold text-slate-900">${data.total_lancadas}</p>
-                <p class="text-sm text-slate-500 mt-1">notas lançadas</p>
+            <div class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-soft">
+                <div>
+                    <p class="text-sm text-stone-600 dark:text-neutral-400 mb-1">Período ${periodo}</p>
+                    <p class="text-3xl sm:text-4xl font-semibold text-stone-900 dark:text-neutral-100">${data.total_lancadas}</p>
+                    <p class="text-sm text-stone-500 dark:text-neutral-500 mt-1">notas lançadas</p>
+                </div>
+                <button onclick="exportarPDF()" ${podeExportar ? "" : "disabled"}
+                    class="bg-brand-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="file-down" class="w-4 h-4"></i>
+                    Exportar PDF
+                </button>
             </div>
             ${
               data.por_fornecedor.length
                 ? `
-            <div class="bg-white border border-slate-200 rounded-xl">
-                <div class="px-4 sm:px-5 py-4 border-b border-slate-100">
-                    <h3 class="font-semibold text-slate-900">Por fornecedor</h3>
+            <div class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl shadow-soft">
+                <div class="px-4 sm:px-5 py-4 border-b border-stone-300 dark:border-neutral-800">
+                    <h3 class="font-semibold text-stone-900 dark:text-neutral-100">Por fornecedor</h3>
                 </div>
-                <ul class="divide-y divide-slate-100">
+                <ul class="divide-y divide-stone-200 dark:divide-neutral-800">
                     ${data.por_fornecedor
                       .map(
                         (f) => `
-                        <li class="px-4 sm:px-5 py-3 flex justify-between items-center gap-3">
-                            <span class="text-sm text-slate-800 truncate">${f.fornecedor__nome}</span>
-                            <span class="text-sm font-semibold text-slate-900 flex-shrink-0">${f.total}</span>
+                        <li class="px-4 sm:px-5 py-3 flex justify-between items-center gap-3 row-hover">
+                            <span class="text-sm text-stone-800 dark:text-neutral-200 truncate">${f.fornecedor__nome}</span>
+                            <span class="text-sm font-semibold text-stone-900 dark:text-neutral-100 flex-shrink-0">${f.total}</span>
                         </li>
                     `,
                       )
@@ -995,28 +1356,105 @@
                 : ""
             }
         `;
+          lucide.createIcons();
         } catch (e) {
           showToast(e.message, "error");
         }
       }
 
-      // ---------- empty state ----------
+      function exportarPDF() {
+        if (
+          !ultimoRelatorio ||
+          !ultimoRelatorio.notas ||
+          !ultimoRelatorio.notas.length
+        ) {
+          showToast("Sem dados para exportar.", "error");
+          return;
+        }
+        try {
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF();
+          const periodo = ultimoRelatorio.mes
+            ? `${ultimoRelatorio.mes}/${ultimoRelatorio.ano}`
+            : `${ultimoRelatorio.ano}`;
+          doc.setFontSize(16);
+          doc.setTextColor(40, 40, 40);
+          doc.text("Relatório de Notas Fiscais — MacNF", 14, 18);
+          doc.setFontSize(10);
+          doc.setTextColor(110, 76, 52);
+          doc.text(`Período: ${periodo}`, 14, 26);
+          doc.setTextColor(100);
+          doc.text(
+            `Total de notas lançadas: ${ultimoRelatorio.total_lancadas}`,
+            14,
+            32,
+          );
+          doc.text(
+            `Gerado em: ${new Date().toLocaleString("pt-BR")} por ${user.username}`,
+            14,
+            38,
+          );
+          doc.autoTable({
+            startY: 45,
+            head: [["Número", "Fornecedor", "Status", "Criação", "Lançamento"]],
+            body: ultimoRelatorio.notas.map((n) => [
+              n.numero_nota,
+              n.fornecedor_nome,
+              statusLabel(n.status),
+              `${fmtDate(n.data_criacao)}\npor ${n.criado_por}`,
+              n.data_lancamento
+                ? `${fmtDate(n.data_lancamento)}\npor ${n.lancada_por}`
+                : "—",
+            ]),
+            headStyles: {
+              fillColor: [110, 76, 52],
+              textColor: 255,
+              fontStyle: "bold",
+            },
+            alternateRowStyles: { fillColor: [245, 243, 239] },
+            styles: { fontSize: 9, cellPadding: 3 },
+            columnStyles: {
+              0: { cellWidth: 22 },
+              1: { cellWidth: 50 },
+              2: { cellWidth: 24 },
+              3: { cellWidth: 45 },
+              4: { cellWidth: 45 },
+            },
+            didDrawPage: (d) => {
+              doc.setFontSize(8);
+              doc.setTextColor(150);
+              doc.text(
+                `Página ${d.pageNumber}`,
+                doc.internal.pageSize.getWidth() - 25,
+                doc.internal.pageSize.getHeight() - 10,
+              );
+            },
+          });
+          doc.save(`relatorio-macnf-${periodo.replace("/", "-")}.pdf`);
+          showToast("PDF gerado!", "success");
+        } catch (e) {
+          showToast("Erro ao gerar PDF: " + e.message, "error");
+        }
+      }
+
       function emptyState(msg, icon) {
         return `<div class="text-center py-12 px-4">
-        <div class="w-12 h-12 bg-slate-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-            <i data-lucide="${icon}" class="w-5 h-5 text-slate-400"></i>
+        <div class="w-12 h-12 bg-stone-200 dark:bg-neutral-800 rounded-full mx-auto mb-3 flex items-center justify-center">
+            <i data-lucide="${icon}" class="w-5 h-5 text-stone-400 dark:text-neutral-500"></i>
         </div>
-        <p class="text-sm text-slate-500">${msg}</p>
+        <p class="text-sm text-stone-500 dark:text-neutral-400">${msg}</p>
     </div>`;
       }
 
-      // fechar sidebar ao redimensionar pra desktop
       window.addEventListener("resize", () => {
         if (window.innerWidth >= 768) closeSidebar();
       });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeSidebar();
+      });
 
-      // ---------- boot ----------
       lucide.createIcons();
+      updateThemeIcons();
       if (token && user) showApp();
     </script>
   </body>
