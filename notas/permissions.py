@@ -14,15 +14,12 @@ def is_estoquista(user):
 
 
 class FornecedorPermission(BasePermission):
-    """Ambos os perfis podem criar e listar fornecedores. Apenas admin deleta."""
+    """Ambos os perfis podem criar, listar e excluir fornecedores."""
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        if request.method == "DELETE":
-            return request.user.is_superuser
         return is_estoquista(request.user) or is_fiscal(request.user)
-
 
 class NotaFiscalPermission(BasePermission):
     """

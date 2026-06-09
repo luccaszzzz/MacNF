@@ -7,9 +7,8 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <meta name="theme-color" content="#6e4c34" />
-    <title>MacNF — Notas Fiscais</title>
+    <title>MacNF - Gestor de Notas Fiscais</title>
 
-    <!-- Aplica tema salvo ANTES do paint pra evitar flash -->
     <script>
       (function () {
         const saved = localStorage.getItem("macnf_theme");
@@ -76,7 +75,6 @@
       .nav-item:hover {
         background-color: #f5f5f4;
       }
-
       .dark .nav-item.active {
         background-color: #1c1917;
         color: #d6b896;
@@ -128,11 +126,24 @@
           opacity: 1;
         }
       }
+      @keyframes tabFade {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
       .login-card {
         animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
       }
       .login-bg {
         animation: fadeIn 0.4s ease-out both;
+      }
+      .tab-enter {
+        animation: tabFade 0.28s ease-out;
       }
 
       .card-hover {
@@ -153,12 +164,21 @@
         background-color: #262626;
       }
 
-      /* Logo: torna mais claro no modo escuro pra ficar legível */
       .logo-img {
         filter: none;
       }
       .dark .logo-img {
         filter: brightness(1.3);
+      }
+
+      /* Divisor vertical entre logo e nome */
+      .brand-divider {
+        width: 1px;
+        background-color: #d6d3d1;
+        align-self: stretch;
+      }
+      .dark .brand-divider {
+        background-color: #404040;
       }
     </style>
   </head>
@@ -171,12 +191,20 @@
       <div
         class="login-card bg-brand-50 dark:bg-neutral-900 rounded-2xl shadow-soft-lg p-6 sm:p-8 w-full max-w-sm border border-stone-300 dark:border-neutral-800"
       >
-        <div class="flex items-center justify-between mb-4">
-          <img
-            src="/static/logo.png"
-            alt="MAC Madeiras"
-            class="logo-img h-10 w-auto"
-          />
+        <div class="flex items-start justify-between mb-1">
+          <div class="flex items-center gap-3">
+            <img
+              src="/static/notas/logo.png"
+              alt="MAC Madeiras"
+              class="logo-img h-10 w-auto"
+            />
+            <div class="brand-divider"></div>
+            <h1
+              class="text-2xl font-bold text-stone-900 dark:text-neutral-100 tracking-tight"
+            >
+              MacNF
+            </h1>
+          </div>
           <button
             onclick="toggleTheme()"
             type="button"
@@ -186,11 +214,8 @@
             <i id="themeIcon" data-lucide="moon" class="w-4 h-4"></i>
           </button>
         </div>
-        <h1 class="text-2xl font-semibold text-stone-900 dark:text-neutral-100">
-          MacNF
-        </h1>
         <p class="text-sm text-stone-500 dark:text-neutral-400 mb-6">
-          Gestão de notas fiscais
+          Gestor de notas fiscais
         </p>
         <form id="loginForm" class="space-y-4">
           <div>
@@ -259,7 +284,18 @@
         >
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
-        <img src="/static/logo.png" alt="MAC" class="logo-img h-6 w-auto" />
+        <div class="flex items-center gap-2">
+          <img
+            src="/static/notas/logo.png"
+            alt="MAC"
+            class="logo-img h-7 w-auto"
+          />
+          <div class="brand-divider"></div>
+          <span
+            class="font-bold text-stone-900 dark:text-neutral-100 tracking-tight"
+            >MacNF</span
+          >
+        </div>
         <div class="flex items-center gap-1">
           <button
             onclick="toggleTheme()"
@@ -288,14 +324,21 @@
         class="sidebar-mobile md:transform-none fixed md:static inset-y-0 left-0 z-50 w-64 md:w-60 bg-brand-50 dark:bg-neutral-900 border-r border-stone-300 dark:border-neutral-800 flex flex-col"
       >
         <div
-          class="px-5 py-5 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between"
+          class="px-5 py-5 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between gap-2"
         >
-          <img
-            src="/static/logo.png"
-            alt="MAC Madeiras"
-            class="logo-img h-8 w-auto"
-          />
-          <div class="flex items-center gap-1">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <img
+              src="/static/notas/logo.png"
+              alt="MAC Madeiras"
+              class="logo-img h-10 w-auto flex-shrink-0"
+            />
+            <div class="brand-divider"></div>
+            <span
+              class="font-bold text-lg text-stone-900 dark:text-neutral-100 tracking-tight"
+              >MacNF</span
+            >
+          </div>
+          <div class="flex items-center gap-0.5 flex-shrink-0">
             <button
               onclick="toggleTheme()"
               class="hidden md:block p-1.5 text-stone-500 hover:text-stone-800 dark:text-neutral-400 dark:hover:text-neutral-200 rounded-md hover:bg-stone-200 dark:hover:bg-neutral-800 transition"
@@ -373,8 +416,14 @@
         <div
           class="p-3 border-t border-stone-300 dark:border-neutral-800 bg-stone-100 dark:bg-neutral-950/50"
         >
-          <div class="flex items-center justify-between px-2 py-1">
-            <div class="min-w-0">
+          <div class="flex items-center gap-3 px-1 py-1">
+            <div
+              id="userAvatar"
+              class="w-9 h-9 rounded-full bg-brand-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
+            >
+              ?
+            </div>
+            <div class="min-w-0 flex-1">
               <p
                 class="text-sm font-medium text-stone-800 dark:text-neutral-200 truncate"
                 id="userName"
@@ -387,7 +436,7 @@
             <button
               onclick="logout()"
               title="Sair"
-              class="hidden md:block text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-300 p-1"
+              class="hidden md:block text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-300 p-1.5 rounded-md hover:bg-stone-200 dark:hover:bg-neutral-800 transition"
             >
               <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
@@ -395,453 +444,472 @@
         </div>
       </aside>
 
-      <main class="flex-1 md:overflow-y-auto bg-stone-200 dark:bg-neutral-950">
-        <!-- ===== Dashboard ===== -->
-        <section id="tab-dashboard" class="tab hidden p-4 sm:p-6 lg:p-8">
-          <h2
-            class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
-          >
-            Painel
-          </h2>
-          <p
-            class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6"
-            id="dashSubtitle"
-          ></p>
+      <main
+        class="flex-1 md:overflow-y-auto bg-stone-200 dark:bg-neutral-950 md:flex md:flex-col"
+      >
+        <div class="flex-1">
+          <!-- ===== Dashboard ===== -->
+          <section id="tab-dashboard" class="tab hidden p-4 sm:p-6 lg:p-8">
+            <h2
+              class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
+              id="dashGreeting"
+            >
+              Olá!
+            </h2>
+            <p
+              class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6"
+              id="dashSubtitle"
+            ></p>
 
-          <div
-            class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
-          >
             <div
-              class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
+              class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
             >
-              <div class="flex items-center justify-between mb-2">
-                <span
-                  class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
-                  >Total</span
-                >
-                <div
-                  class="w-7 h-7 rounded-lg bg-stone-200 dark:bg-neutral-800 flex items-center justify-center"
-                >
-                  <i
-                    data-lucide="files"
-                    class="w-3.5 h-3.5 text-stone-500 dark:text-neutral-400"
-                  ></i>
-                </div>
-              </div>
-              <p
-                class="text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-neutral-100"
-                id="statTotal"
+              <div
+                class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
               >
-                —
-              </p>
-            </div>
-            <div
-              class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
-            >
-              <div class="flex items-center justify-between mb-2">
-                <span
-                  class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
-                  >Em análise</span
-                >
-                <div
-                  class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center"
-                >
-                  <i
-                    data-lucide="clock"
-                    class="w-3.5 h-3.5 text-amber-700 dark:text-amber-400"
-                  ></i>
-                </div>
-              </div>
-              <p
-                class="text-2xl sm:text-3xl font-semibold text-amber-700 dark:text-amber-400"
-                id="statAnalise"
-              >
-                —
-              </p>
-            </div>
-            <div
-              class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
-            >
-              <div class="flex items-center justify-between mb-2">
-                <span
-                  class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
-                  >No mês</span
-                >
-                <div
-                  class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center"
-                >
-                  <i
-                    data-lucide="check-circle-2"
-                    class="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400"
-                  ></i>
-                </div>
-              </div>
-              <p
-                class="text-2xl sm:text-3xl font-semibold text-emerald-700 dark:text-emerald-400"
-                id="statMes"
-              >
-                —
-              </p>
-            </div>
-            <div
-              class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
-            >
-              <div class="flex items-center justify-between mb-2">
-                <span
-                  class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
-                  >Lançadas</span
-                >
-                <div
-                  class="w-7 h-7 rounded-lg bg-brand-100 dark:bg-brand-800/30 flex items-center justify-center"
-                >
-                  <i
-                    data-lucide="check-check"
-                    class="w-3.5 h-3.5 text-brand-600 dark:text-brand-400"
-                  ></i>
-                </div>
-              </div>
-              <p
-                class="text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-neutral-100"
-                id="statLancadas"
-              >
-                —
-              </p>
-            </div>
-          </div>
-
-          <div
-            class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl shadow-soft"
-          >
-            <div
-              class="px-4 sm:px-5 py-4 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between"
-            >
-              <h3 class="font-semibold text-stone-900 dark:text-neutral-100">
-                Notas recentes
-              </h3>
-              <button
-                onclick="showTab('tab-notas')"
-                class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
-              >
-                Ver todas →
-              </button>
-            </div>
-            <div
-              id="dashRecent"
-              class="divide-y divide-stone-200 dark:divide-neutral-800"
-            ></div>
-          </div>
-        </section>
-
-        <!-- ===== Nova nota ===== -->
-        <section
-          id="tab-nova"
-          class="tab hidden estoquista-only p-4 sm:p-6 lg:p-8"
-        >
-          <h2
-            class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
-          >
-            Cadastrar nota fiscal
-          </h2>
-          <p class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6">
-            Preencha os dados e envie ao setor fiscal.
-          </p>
-
-          <form
-            id="notaForm"
-            class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 max-w-3xl shadow-soft"
-          >
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-              <div class="md:col-span-2">
-                <label
-                  class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
-                  >Fornecedor</label
-                >
-                <select
-                  id="nf_fornecedor"
-                  required
-                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
-                ></select>
-              </div>
-              <div>
-                <label
-                  class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
-                  >Número da nota</label
-                >
-                <input
-                  id="nf_numero"
-                  type="text"
-                  inputmode="numeric"
-                  required
-                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
-                />
-              </div>
-              <div>
-                <label
-                  class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
-                  >Chave de acesso</label
-                >
-                <input
-                  id="nf_chave"
-                  type="text"
-                  inputmode="numeric"
-                  maxlength="44"
-                  required
-                  placeholder="44 dígitos"
-                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm font-mono text-stone-900 dark:text-neutral-100 placeholder-stone-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
-                />
-              </div>
-              <div class="md:col-span-2">
-                <label
-                  class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
-                  >PDF da nota</label
-                >
-                <div
-                  class="border-2 border-dashed border-stone-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 rounded-lg p-4 hover:border-brand-400 transition"
-                >
-                  <input
-                    id="nf_pdf"
-                    type="file"
-                    accept="application/pdf,.pdf"
-                    required
-                    class="w-full text-sm text-stone-700 dark:text-neutral-300"
-                  />
-                </div>
-              </div>
-              <div class="md:col-span-2">
-                <label
-                  class="flex justify-between text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
-                >
-                  <span>Observação</span>
+                <div class="flex items-center justify-between mb-2">
                   <span
-                    class="text-xs text-stone-400 dark:text-neutral-500"
-                    id="obsCount"
-                    >0 / 1000</span
+                    class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
+                    >Total</span
                   >
-                </label>
-                <textarea
-                  id="nf_obs"
-                  maxlength="1000"
-                  rows="3"
-                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
-                ></textarea>
+                  <div
+                    class="w-7 h-7 rounded-lg bg-stone-200 dark:bg-neutral-800 flex items-center justify-center"
+                  >
+                    <i
+                      data-lucide="files"
+                      class="w-3.5 h-3.5 text-stone-500 dark:text-neutral-400"
+                    ></i>
+                  </div>
+                </div>
+                <p
+                  class="text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-neutral-100"
+                  id="statTotal"
+                >
+                  —
+                </p>
+              </div>
+              <div
+                class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
+              >
+                <div class="flex items-center justify-between mb-2">
+                  <span
+                    class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
+                    >Em análise</span
+                  >
+                  <div
+                    class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center"
+                  >
+                    <i
+                      data-lucide="clock"
+                      class="w-3.5 h-3.5 text-amber-700 dark:text-amber-400"
+                    ></i>
+                  </div>
+                </div>
+                <p
+                  class="text-2xl sm:text-3xl font-semibold text-amber-700 dark:text-amber-400"
+                  id="statAnalise"
+                >
+                  —
+                </p>
+              </div>
+              <div
+                class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
+              >
+                <div class="flex items-center justify-between mb-2">
+                  <span
+                    class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
+                    >No mês</span
+                  >
+                  <div
+                    class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center"
+                  >
+                    <i
+                      data-lucide="check-circle-2"
+                      class="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400"
+                    ></i>
+                  </div>
+                </div>
+                <p
+                  class="text-2xl sm:text-3xl font-semibold text-emerald-700 dark:text-emerald-400"
+                  id="statMes"
+                >
+                  —
+                </p>
+              </div>
+              <div
+                class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
+              >
+                <div class="flex items-center justify-between mb-2">
+                  <span
+                    class="text-xs sm:text-sm text-stone-600 dark:text-neutral-400"
+                    >Lançadas</span
+                  >
+                  <div
+                    class="w-7 h-7 rounded-lg bg-brand-100 dark:bg-brand-800/30 flex items-center justify-center"
+                  >
+                    <i
+                      data-lucide="check-check"
+                      class="w-3.5 h-3.5 text-brand-600 dark:text-brand-400"
+                    ></i>
+                  </div>
+                </div>
+                <p
+                  class="text-2xl sm:text-3xl font-semibold text-stone-900 dark:text-neutral-100"
+                  id="statLancadas"
+                >
+                  —
+                </p>
               </div>
             </div>
-            <div class="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
-              <button
-                type="submit"
-                class="w-full sm:w-auto bg-brand-600 text-white rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                <i data-lucide="send" class="w-4 h-4"></i>
-                Salvar e enviar ao fiscal
-              </button>
-              <button
-                type="reset"
-                class="text-sm text-stone-600 hover:text-stone-900 dark:text-neutral-400 dark:hover:text-neutral-200 py-2"
-              >
-                Limpar
-              </button>
-            </div>
-          </form>
-        </section>
 
-        <!-- ===== Notas ===== -->
-        <section id="tab-notas" class="tab hidden p-4 sm:p-6 lg:p-8">
-          <div
-            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6"
-          >
-            <div>
-              <h2
-                class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
-              >
-                Notas fiscais
-              </h2>
-              <p
-                class="text-sm text-stone-500 dark:text-neutral-400"
-                id="notasSubtitle"
-              ></p>
-            </div>
-            <select
-              id="filtroStatus"
-              onchange="loadNotas()"
-              class="border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm bg-brand-50 dark:bg-neutral-900 text-stone-900 dark:text-neutral-100 shadow-soft"
-            >
-              <option value="">Todos os status</option>
-              <option value="em_analise">Em análise</option>
-              <option value="lancada">Lançadas</option>
-            </select>
-          </div>
-
-          <div
-            class="hidden md:block bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl overflow-hidden shadow-soft"
-          >
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead
-                  class="text-left text-xs uppercase text-stone-500 dark:text-neutral-400 bg-stone-100 dark:bg-neutral-950/50 border-b border-stone-300 dark:border-neutral-800"
-                >
-                  <tr>
-                    <th class="px-4 py-3 font-medium">Número</th>
-                    <th class="px-4 py-3 font-medium">Fornecedor</th>
-                    <th class="px-4 py-3 font-medium">Status</th>
-                    <th class="px-4 py-3 font-medium">Criação</th>
-                    <th class="px-4 py-3 font-medium">Lançamento</th>
-                    <th class="px-4 py-3 font-medium">PDF</th>
-                    <th class="px-4 py-3 font-medium text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody
-                  id="notasBody"
-                  class="divide-y divide-stone-200 dark:divide-neutral-800"
-                ></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div id="notasCards" class="md:hidden space-y-3"></div>
-        </section>
-
-        <!-- ===== Relatório ===== -->
-        <section
-          id="tab-relatorio"
-          class="tab hidden fiscal-only p-4 sm:p-6 lg:p-8"
-        >
-          <h2
-            class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
-          >
-            Relatórios
-          </h2>
-          <p class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6">
-            Notas lançadas por período.
-          </p>
-
-          <div
-            class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 mb-6 shadow-soft"
-          >
             <div
-              class="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 sm:items-end"
+              class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl shadow-soft"
             >
-              <div>
-                <label
-                  class="block text-xs font-medium text-stone-600 dark:text-neutral-400 mb-1.5"
-                  >Ano</label
-                >
-                <input
-                  id="rel_ano"
-                  type="number"
-                  value="2026"
-                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm sm:w-28 text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 transition"
-                />
-              </div>
-              <div>
-                <label
-                  class="block text-xs font-medium text-stone-600 dark:text-neutral-400 mb-1.5"
-                  >Mês</label
-                >
-                <select
-                  id="rel_mes"
-                  class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm sm:w-40 text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 transition"
-                >
-                  <option value="">Todos</option>
-                  <option value="1">Janeiro</option>
-                  <option value="2">Fevereiro</option>
-                  <option value="3">Março</option>
-                  <option value="4">Abril</option>
-                  <option value="5">Maio</option>
-                  <option value="6">Junho</option>
-                  <option value="7">Julho</option>
-                  <option value="8">Agosto</option>
-                  <option value="9">Setembro</option>
-                  <option value="10">Outubro</option>
-                  <option value="11">Novembro</option>
-                  <option value="12">Dezembro</option>
-                </select>
-              </div>
-              <button
-                onclick="loadRelatorio()"
-                class="col-span-2 sm:col-span-1 bg-brand-600 text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-60"
+              <div
+                class="px-4 sm:px-5 py-4 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between"
               >
-                <i data-lucide="play" class="w-4 h-4"></i>
-                Gerar
-              </button>
+                <h3 class="font-semibold text-stone-900 dark:text-neutral-100">
+                  Notas recentes
+                </h3>
+                <button
+                  onclick="showTab('tab-notas')"
+                  class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+                >
+                  Ver todas →
+                </button>
+              </div>
+              <div
+                id="dashRecent"
+                class="divide-y divide-stone-200 dark:divide-neutral-800"
+              ></div>
             </div>
-          </div>
+          </section>
 
-          <div id="relResult"></div>
-        </section>
-
-        <!-- ===== Fornecedores ===== -->
-        <section id="tab-fornecedor" class="tab hidden p-4 sm:p-6 lg:p-8">
-          <h2
-            class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
+          <!-- ===== Nova nota ===== -->
+          <section
+            id="tab-nova"
+            class="tab hidden estoquista-only p-4 sm:p-6 lg:p-8"
           >
-            Fornecedores
-          </h2>
-          <p class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6">
-            Cadastre os fornecedores que emitem suas notas.
-          </p>
-
-          <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
-            <div
-              class="lg:col-span-2 bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 self-start shadow-soft"
+            <h2
+              class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
             >
-              <h3
-                class="font-semibold text-stone-900 dark:text-neutral-100 mb-4"
-              >
-                Novo fornecedor
-              </h3>
-              <form id="fornForm" class="space-y-4">
+              Cadastrar nota fiscal
+            </h2>
+            <p
+              class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6"
+            >
+              Preencha os dados e envie ao setor fiscal.
+            </p>
+
+            <form
+              id="notaForm"
+              class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 max-w-3xl shadow-soft"
+            >
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                <div class="md:col-span-2">
+                  <label
+                    class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+                    >Fornecedor</label
+                  >
+                  <select
+                    id="nf_fornecedor"
+                    required
+                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+                  ></select>
+                </div>
                 <div>
                   <label
                     class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
-                    >CNPJ</label
+                    >Número da nota</label
                   >
                   <input
-                    id="forn_cnpj"
+                    id="nf_numero"
                     type="text"
                     inputmode="numeric"
-                    required
-                    placeholder="00.000.000/0000-00"
-                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm font-mono text-stone-900 dark:text-neutral-100 placeholder-stone-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
-                  />
-                </div>
-                <div>
-                  <label
-                    class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
-                    >Nome / razão social</label
-                  >
-                  <input
-                    id="forn_nome"
-                    type="text"
                     required
                     class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
                   />
                 </div>
+                <div>
+                  <label
+                    class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+                    >Chave de acesso</label
+                  >
+                  <input
+                    id="nf_chave"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="44"
+                    required
+                    placeholder="44 dígitos"
+                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm font-mono text-stone-900 dark:text-neutral-100 placeholder-stone-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+                  />
+                </div>
+                <div class="md:col-span-2">
+                  <label
+                    class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+                    >PDF da nota</label
+                  >
+                  <div
+                    class="border-2 border-dashed border-stone-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 rounded-lg p-4 hover:border-brand-400 transition"
+                  >
+                    <input
+                      id="nf_pdf"
+                      type="file"
+                      accept="application/pdf,.pdf"
+                      required
+                      class="w-full text-sm text-stone-700 dark:text-neutral-300"
+                    />
+                  </div>
+                </div>
+                <div class="md:col-span-2">
+                  <label
+                    class="flex justify-between text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+                  >
+                    <span>Observação</span>
+                    <span
+                      class="text-xs text-stone-400 dark:text-neutral-500"
+                      id="obsCount"
+                      >0 / 1000</span
+                    >
+                  </label>
+                  <textarea
+                    id="nf_obs"
+                    maxlength="1000"
+                    rows="3"
+                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+                  ></textarea>
+                </div>
+              </div>
+              <div class="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
                 <button
                   type="submit"
-                  class="w-full bg-brand-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed"
+                  class="w-full sm:w-auto bg-brand-600 text-white rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Cadastrar
+                  <i data-lucide="send" class="w-4 h-4"></i>
+                  Salvar e enviar ao fiscal
                 </button>
-              </form>
+                <button
+                  type="reset"
+                  class="text-sm text-stone-600 hover:text-stone-900 dark:text-neutral-400 dark:hover:text-neutral-200 py-2"
+                >
+                  Limpar
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <!-- ===== Notas ===== -->
+          <section id="tab-notas" class="tab hidden p-4 sm:p-6 lg:p-8">
+            <div
+              class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6"
+            >
+              <div>
+                <h2
+                  class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
+                >
+                  Notas fiscais
+                </h2>
+                <p
+                  class="text-sm text-stone-500 dark:text-neutral-400"
+                  id="notasSubtitle"
+                ></p>
+              </div>
+              <select
+                id="filtroStatus"
+                onchange="loadNotas()"
+                class="border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm bg-brand-50 dark:bg-neutral-900 text-stone-900 dark:text-neutral-100 shadow-soft"
+              >
+                <option value="">Todos os status</option>
+                <option value="em_analise">Em análise</option>
+                <option value="lancada">Lançadas</option>
+              </select>
             </div>
 
             <div
-              class="lg:col-span-3 bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl shadow-soft"
+              class="hidden md:block bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl overflow-hidden shadow-soft"
+            >
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead
+                    class="text-left text-xs uppercase text-stone-500 dark:text-neutral-400 bg-stone-100 dark:bg-neutral-950/50 border-b border-stone-300 dark:border-neutral-800"
+                  >
+                    <tr>
+                      <th class="px-4 py-3 font-medium">Número</th>
+                      <th class="px-4 py-3 font-medium">Fornecedor</th>
+                      <th class="px-4 py-3 font-medium">Status</th>
+                      <th class="px-4 py-3 font-medium">Criação</th>
+                      <th class="px-4 py-3 font-medium">Lançamento</th>
+                      <th class="px-4 py-3 font-medium">PDF</th>
+                      <th class="px-4 py-3 font-medium text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="notasBody"
+                    class="divide-y divide-stone-200 dark:divide-neutral-800"
+                  ></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div id="notasCards" class="md:hidden space-y-3"></div>
+          </section>
+
+          <!-- ===== Relatório ===== -->
+          <section
+            id="tab-relatorio"
+            class="tab hidden fiscal-only p-4 sm:p-6 lg:p-8"
+          >
+            <h2
+              class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
+            >
+              Relatórios
+            </h2>
+            <p
+              class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6"
+            >
+              Notas lançadas por período.
+            </p>
+
+            <div
+              class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 mb-6 shadow-soft"
             >
               <div
-                class="px-4 sm:px-5 py-4 border-b border-stone-300 dark:border-neutral-800"
+                class="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 sm:items-end"
               >
-                <h3 class="font-semibold text-stone-900 dark:text-neutral-100">
-                  Cadastrados
-                </h3>
+                <div>
+                  <label
+                    class="block text-xs font-medium text-stone-600 dark:text-neutral-400 mb-1.5"
+                    >Ano</label
+                  >
+                  <input
+                    id="rel_ano"
+                    type="number"
+                    value="2026"
+                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm sm:w-28 text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 transition"
+                  />
+                </div>
+                <div>
+                  <label
+                    class="block text-xs font-medium text-stone-600 dark:text-neutral-400 mb-1.5"
+                    >Mês</label
+                  >
+                  <select
+                    id="rel_mes"
+                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm sm:w-40 text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 transition"
+                  >
+                    <option value="">Todos</option>
+                    <option value="1">Janeiro</option>
+                    <option value="2">Fevereiro</option>
+                    <option value="3">Março</option>
+                    <option value="4">Abril</option>
+                    <option value="5">Maio</option>
+                    <option value="6">Junho</option>
+                    <option value="7">Julho</option>
+                    <option value="8">Agosto</option>
+                    <option value="9">Setembro</option>
+                    <option value="10">Outubro</option>
+                    <option value="11">Novembro</option>
+                    <option value="12">Dezembro</option>
+                  </select>
+                </div>
+                <button
+                  onclick="loadRelatorio()"
+                  class="col-span-2 sm:col-span-1 bg-brand-600 text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  <i data-lucide="play" class="w-4 h-4"></i>
+                  Gerar
+                </button>
               </div>
-              <ul
-                id="fornList"
-                class="divide-y divide-stone-200 dark:divide-neutral-800"
-              ></ul>
             </div>
-          </div>
-        </section>
+
+            <div id="relResult"></div>
+          </section>
+
+          <!-- ===== Fornecedores ===== -->
+          <section id="tab-fornecedor" class="tab hidden p-4 sm:p-6 lg:p-8">
+            <h2
+              class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
+            >
+              Fornecedores
+            </h2>
+            <p
+              class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6"
+            >
+              Cadastre os fornecedores que emitem suas notas.
+            </p>
+
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-6">
+              <div
+                class="lg:col-span-2 bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 self-start shadow-soft"
+              >
+                <h3
+                  class="font-semibold text-stone-900 dark:text-neutral-100 mb-4"
+                >
+                  Novo fornecedor
+                </h3>
+                <form id="fornForm" class="space-y-4">
+                  <div>
+                    <label
+                      class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+                      >CNPJ</label
+                    >
+                    <input
+                      id="forn_cnpj"
+                      type="text"
+                      inputmode="numeric"
+                      required
+                      placeholder="00.000.000/0000-00"
+                      class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm font-mono text-stone-900 dark:text-neutral-100 placeholder-stone-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+                      >Nome / razão social</label
+                    >
+                    <input
+                      id="forn_nome"
+                      type="text"
+                      required
+                      class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    class="w-full bg-brand-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    Cadastrar
+                  </button>
+                </form>
+              </div>
+
+              <div
+                class="lg:col-span-3 bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl shadow-soft"
+              >
+                <div
+                  class="px-4 sm:px-5 py-4 border-b border-stone-300 dark:border-neutral-800"
+                >
+                  <h3
+                    class="font-semibold text-stone-900 dark:text-neutral-100"
+                  >
+                    Cadastrados
+                  </h3>
+                </div>
+                <ul
+                  id="fornList"
+                  class="divide-y divide-stone-200 dark:divide-neutral-800"
+                ></ul>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer
+          class="text-center py-4 px-4 text-xs text-stone-500 dark:text-neutral-500 border-t border-stone-300 dark:border-neutral-800 mt-8"
+        >
+          © <span id="footerYear">2026</span> MAC Madeiras · MacNF
+        </footer>
       </main>
     </div>
 
@@ -862,6 +930,10 @@
       let user = JSON.parse(localStorage.getItem("macnf_user") || "null");
       let fornecedoresCache = null;
       let ultimoRelatorio = null;
+
+      // Ano do footer dinâmico
+      document.getElementById("footerYear").textContent =
+        new Date().getFullYear();
 
       // ---------- tema ----------
       function isDark() {
@@ -929,7 +1001,7 @@
         clearTimeout(showToast._t);
         showToast._t = setTimeout(
           () => document.getElementById("toast").classList.add("hidden"),
-          3000,
+          3500,
         );
       }
 
@@ -972,6 +1044,14 @@
         inp.type = isPwd ? "text" : "password";
         wrapper.innerHTML = `<i data-lucide="${isPwd ? "eye-off" : "eye"}" class="w-4 h-4"></i>`;
         lucide.createIcons();
+      }
+
+      // ---------- saudação ----------
+      function getSaudacao() {
+        const h = new Date().getHours();
+        if (h < 12) return "Bom dia";
+        if (h < 18) return "Boa tarde";
+        return "Boa noite";
       }
 
       document
@@ -1023,6 +1103,8 @@
         document.getElementById("userRole").textContent = user.is_fiscal
           ? "Setor fiscal"
           : "Estoquista";
+        document.getElementById("userAvatar").textContent = (user.username ||
+          "?")[0].toUpperCase();
 
         document.querySelectorAll(".fiscal-only").forEach((el) => {
           el.style.display = user.is_fiscal ? "" : "none";
@@ -1037,10 +1119,15 @@
       }
 
       function showTab(id) {
-        document
-          .querySelectorAll(".tab")
-          .forEach((t) => t.classList.add("hidden"));
-        document.getElementById(id).classList.remove("hidden");
+        document.querySelectorAll(".tab").forEach((t) => {
+          t.classList.add("hidden");
+          t.classList.remove("tab-enter");
+        });
+        const el = document.getElementById(id);
+        el.classList.remove("hidden");
+        void el.offsetWidth; // força reflow pra reiniciar animação
+        el.classList.add("tab-enter");
+
         document
           .querySelectorAll(".nav-item")
           .forEach((b) => b.classList.toggle("active", b.dataset.tab === id));
@@ -1052,6 +1139,8 @@
       }
 
       async function loadDashboard() {
+        document.getElementById("dashGreeting").textContent =
+          `${getSaudacao()}, ${user.username}!`;
         document.getElementById("dashSubtitle").textContent = user.is_fiscal
           ? "Visão geral de todas as notas do sistema."
           : "Resumo das suas notas.";
@@ -1104,12 +1193,15 @@
 
       async function loadFornecedores() {
         try {
-          const list = await getFornecedores();
+          const list = await getFornecedores(true); // sempre busca atualizado nessa tela
           document.getElementById("fornList").innerHTML = list.length
             ? list
-                .map(
-                  (f) => `
-            <li class="px-4 sm:px-5 py-3 flex items-center gap-3 row-hover">
+                .map((f) => {
+                  const nomeEscapado = (f.nome || "")
+                    .replace(/'/g, "\\'")
+                    .replace(/"/g, "&quot;");
+                  return `
+            <li class="px-4 sm:px-5 py-3 flex items-center gap-3 row-hover group">
                 <div class="w-10 h-10 bg-brand-100 dark:bg-brand-800/30 rounded-lg flex items-center justify-center flex-shrink-0">
                     <i data-lucide="building-2" class="w-4 h-4 text-brand-600 dark:text-brand-400"></i>
                 </div>
@@ -1117,14 +1209,42 @@
                     <p class="text-sm font-medium text-stone-900 dark:text-neutral-100 truncate">${f.nome}</p>
                     <p class="text-xs text-stone-500 dark:text-neutral-400 font-mono">${f.cnpj}</p>
                 </div>
+                <button onclick="deleteFornecedor(${f.id}, '${nomeEscapado}')"
+                    class="text-stone-400 hover:text-red-600 dark:text-neutral-500 dark:hover:text-red-400 p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                    title="Excluir fornecedor">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
             </li>
-        `,
-                )
+        `;
+                })
                 .join("")
             : `<li>${emptyState("Nenhum fornecedor cadastrado.", "building-2")}</li>`;
           lucide.createIcons();
         } catch (e) {
           showToast(e.message, "error");
+        }
+      }
+
+      async function deleteFornecedor(id, nome) {
+        if (
+          !confirm(
+            `Excluir o fornecedor "${nome}"?\n\nIsso não pode ser desfeito.`,
+          )
+        )
+          return;
+        try {
+          await api("DELETE", `/fornecedores/${id}/`);
+          showToast("Fornecedor excluído.", "success");
+          fornecedoresCache = null;
+          loadFornecedores();
+        } catch (e) {
+          let msg = "Erro ao excluir.";
+          try {
+            const parsed = JSON.parse(e.message);
+            if (parsed.erro) msg = parsed.erro;
+            else if (parsed.detail) msg = parsed.detail;
+          } catch {}
+          showToast(msg, "error");
         }
       }
 

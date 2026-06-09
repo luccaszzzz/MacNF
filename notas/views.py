@@ -1,5 +1,6 @@
 from django.utils import timezone
 from django.db.models import Count
+from django.db.models.deletion import ProtectedError
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -31,6 +32,18 @@ class FornecedorViewSet(viewsets.ModelViewSet):
     queryset = Fornecedor.objects.all()
     serializer_class = FornecedorSerializer
     permission_classes = [FornecedorPermission]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            instance.delete()
+        except ProtectedError:
+            count = instance.notas.count()
+            return Response(
+                {'erro': f'Não é possível excluir "{instance.nome}": existem {count} nota(s) fiscal(is) vinculada(s) a este fornecedor.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class NotaFiscalViewSet(viewsets.ModelViewSet):
