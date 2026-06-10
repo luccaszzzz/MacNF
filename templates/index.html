@@ -1016,6 +1016,14 @@
           }
         }
         const res = await fetch(API + path, { method, headers, body });
+
+        // Token inválido ou expirado: faz logout automático
+        if (res.status === 401) {
+          showToast("Sessão expirada. Faça login novamente.", "error");
+          setTimeout(() => logout(), 1500);
+          throw new Error("Sessão expirada");
+        }
+
         if (!res.ok) throw new Error((await res.text()) || res.statusText);
         return res.status === 204 ? null : res.json();
       }
@@ -1575,7 +1583,25 @@
 
       lucide.createIcons();
       updateThemeIcons();
-      if (token && user) showApp();
+      if (token && user) {
+        // Valida o token cacheado fazendo uma requisição rápida ao backend
+        fetch(API + "/notas/stats/", {
+          headers: { Authorization: `Token ${token}` },
+        })
+          .then((res) => {
+            if (res.status === 401) {
+              // Token velho/inválido: limpa silenciosamente e mostra login
+              localStorage.removeItem("macnf_token");
+              localStorage.removeItem("macnf_user");
+            } else {
+              showApp();
+            }
+          })
+          .catch(() => {
+            // Erro de rede: tenta mostrar o app mesmo assim, a próxima ação trata
+            showApp();
+          });
+      }
     </script>
   </body>
 </html>
