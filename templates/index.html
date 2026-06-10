@@ -670,12 +670,12 @@
                     <span
                       class="text-xs text-stone-400 dark:text-neutral-500"
                       id="obsCount"
-                      >0 / 1000</span
+                      >0 / 2000</span
                     >
                   </label>
                   <textarea
                     id="nf_obs"
-                    maxlength="1000"
+                    maxlength="2000"
                     rows="3"
                     class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
                   ></textarea>
@@ -1272,7 +1272,7 @@
 
       document.getElementById("nf_obs").addEventListener("input", (e) => {
         document.getElementById("obsCount").textContent =
-          `${e.target.value.length} / 1000`;
+          `${e.target.value.length} / 2000`;
       });
 
       document
@@ -1294,7 +1294,7 @@
             await api("POST", "/notas/", fd, true);
             showToast("Nota enviada ao setor fiscal!", "success");
             e.target.reset();
-            document.getElementById("obsCount").textContent = "0 / 1000";
+            document.getElementById("obsCount").textContent = "0 / 2000";
           } catch (err) {
             showToast("Erro: " + err.message, "error");
           } finally {

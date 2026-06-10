@@ -27,7 +27,7 @@ class NotaFiscal(models.Model):
     numero_nota = models.CharField(max_length=50)
     chave_acesso = models.CharField(max_length=44, unique=True)
     pdf_nota = models.FileField(upload_to="notas/%Y/%m/")
-    observacao = models.TextField(max_length=1000, blank=True)
+    observacao = models.TextField(max_length=2000, blank=True)
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pendente")
 
