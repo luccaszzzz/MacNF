@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "notas",
+    "axes",
 ]
 
 MIDDLEWARE = [
@@ -35,12 +36,13 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates'],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -69,11 +71,28 @@ REST_FRAMEWORK = {
     ],
 }
 
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# Rate limiting (django-axes)
+AXES_FAILURE_LIMIT = 5  # número de tentativas erradas
+AXES_COOLOFF_TIME = 1  # tempo de bloqueio em HORAS
+AXES_RESET_ON_SUCCESS = True  # zera contador ao logar com sucesso
+AXES_LOCKOUT_PARAMETERS = ["ip_address"]  # bloqueia por IP
+AXES_IPWARE_PROXY_COUNT = 1  # número de proxies confiáveis para obter IP real
+AXES_IPWARE_META_PRECEDENCE_ORDER = (
+    "HTTP_X_FORWARDED_FOR",
+)  # ordem de precedência para obter IP real
+
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    },
 }
 
 MEDIA_URL = "media/"
