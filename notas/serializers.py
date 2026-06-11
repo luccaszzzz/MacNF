@@ -1,11 +1,54 @@
+import re
 from rest_framework import serializers
+from validate_docbr import CNPJ
 from .models import Fornecedor, NotaFiscal, HistoricoNotaFiscal
+
+
+def validar_cnpj(value):
+    """Valida CNPJ com cálculo de dígito verificador."""
+    cnpj_limpo = re.sub(r"\D", "", value or "")
+
+    if len(cnpj_limpo) != 14:
+        raise serializers.ValidationError("CNPJ deve ter 14 dígitos.")
+
+    if not CNPJ().validate(cnpj_limpo):
+        raise serializers.ValidationError("CNPJ inválido. Verifique os números.")
+
+    # Formata pro padrão 00.000.000/0000-00
+    return f"{cnpj_limpo[:2]}.{cnpj_limpo[2:5]}.{cnpj_limpo[5:8]}/{cnpj_limpo[8:12]}-{cnpj_limpo[12:]}"
+
+
+def validar_chave_acesso(value):
+    """Valida chave de acesso da NFe (44 dígitos + DV módulo 11)."""
+    chave_limpa = re.sub(r"\D", "", value or "")
+
+    if len(chave_limpa) != 44:
+        raise serializers.ValidationError(
+            "Chave de acesso deve ter exatamente 44 dígitos numéricos."
+        )
+
+    # Cálculo do dígito verificador (módulo 11)
+    pesos = [2, 3, 4, 5, 6, 7, 8, 9] * 6  # 48 valores
+    soma = sum(int(chave_limpa[i]) * pesos[42 - i] for i in range(43))
+    resto = soma % 11
+    dv_calculado = 0 if resto < 2 else 11 - resto
+
+    if int(chave_limpa[43]) != dv_calculado:
+        raise serializers.ValidationError(
+            "Chave de acesso com dígito verificador inválido. "
+            "Confira a chave no PDF da nota."
+        )
+
+    return chave_limpa
 
 
 class FornecedorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Fornecedor
         fields = ["id", "cnpj", "nome", "criado_em"]
+
+    def validate_cnpj(self, value):
+        return validar_cnpj(value)
 
 
 class HistoricoSerializer(serializers.ModelSerializer):
@@ -48,3 +91,6 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
             "data_lancamento",
             "lancada_por",
         ]
+
+    def validate_chave_acesso(self, value):
+        return validar_chave_acesso(value)
