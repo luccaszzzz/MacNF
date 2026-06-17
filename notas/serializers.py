@@ -94,3 +94,19 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
 
     def validate_chave_acesso(self, value):
         return validar_chave_acesso(value)
+
+    def validate_pdf_nota(self, value):
+        """Aceita PDF ou imagens comuns."""
+        extensoes_validas = [".pdf", ".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp"]
+        nome = value.name.lower()
+
+        if not any(nome.endswith(ext) for ext in extensoes_validas):
+            raise serializers.ValidationError(
+                "Arquivo deve ser PDF, JPG, PNG, HEIC ou WEBP."
+            )
+
+        # Limite de 10 MB no upload (antes da compressão)
+        if value.size > 10 * 1024 * 1024:
+            raise serializers.ValidationError("Arquivo muito grande. Máximo: 10 MB.")
+
+        return value

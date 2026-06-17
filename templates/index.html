@@ -86,26 +86,47 @@
         background-color: #262626;
       }
 
-      @media (max-width: 768px) {
+      @media (max-width: 640px) {
         button,
-        .btn {
-          min-height: 44px;
+        .btn,
+        .nav-item {
+          min-height: 48px;
         }
         input,
         select,
         textarea {
           font-size: 16px !important;
         }
+        .tab {
+          padding: 1rem !important;
+        }
+        .card-hover {
+          touch-action: manipulation;
+        }
+        .observacao-text {
+          word-break: break-word;
+          overflow-wrap: break-word;
+          hyphens: auto;
+        }
       }
+
+      @media (min-width: 641px) and (max-width: 1024px) {
+        .tab {
+          padding: 1.5rem !important;
+        }
+      }
+
       .sidebar-mobile {
         transform: translateX(-100%);
-        transition: transform 0.25s ease;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
       }
       .sidebar-mobile.open {
         transform: translateX(0);
       }
       .backdrop {
         background: rgba(0, 0, 0, 0.5);
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
       }
 
       @keyframes slideUp {
@@ -156,6 +177,9 @@
           0 4px 6px -1px rgba(0, 0, 0, 0.1),
           0 2px 4px -1px rgba(0, 0, 0, 0.06);
       }
+      .card-hover:active {
+        transform: scale(0.98);
+      }
 
       .row-hover:hover {
         background-color: #f5f5f4;
@@ -171,7 +195,6 @@
         filter: brightness(1.3);
       }
 
-      /* Divisor vertical entre logo e nome */
       .brand-divider {
         width: 1px;
         background-color: #d6d3d1;
@@ -179,6 +202,19 @@
       }
       .dark .brand-divider {
         background-color: #404040;
+      }
+
+      .scroll-smooth {
+        scroll-behavior: smooth;
+      }
+
+      input[type="text"],
+      input[type="password"],
+      input[type="number"],
+      select,
+      textarea {
+        -webkit-appearance: none;
+        appearance: none;
       }
     </style>
   </head>
@@ -209,7 +245,7 @@
             onclick="toggleTheme()"
             type="button"
             aria-label="Alternar tema"
-            class="p-2 rounded-lg text-stone-500 hover:bg-stone-200 dark:text-neutral-400 dark:hover:bg-neutral-800 transition"
+            class="p-2 rounded-lg text-stone-500 hover:bg-stone-200 dark:text-neutral-400 dark:hover:bg-neutral-800 transition touch-manipulation"
           >
             <i id="themeIcon" data-lucide="moon" class="w-4 h-4"></i>
           </button>
@@ -249,7 +285,7 @@
                 id="eyeWrapper"
                 onclick="togglePassword()"
                 aria-label="Mostrar ou ocultar senha"
-                class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-300 rounded-md"
+                class="absolute right-1 top-1/2 -translate-y-1/2 p-2 text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-300 rounded-md touch-manipulation"
               >
                 <i data-lucide="eye" class="w-4 h-4"></i>
               </button>
@@ -261,7 +297,7 @@
           ></div>
           <button
             type="submit"
-            class="w-full bg-brand-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed"
+            class="w-full bg-brand-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation"
           >
             Entrar
           </button>
@@ -273,14 +309,14 @@
     <div
       id="mainView"
       style="display: none"
-      class="min-h-screen md:h-screen md:flex md:overflow-hidden"
+      class="min-h-screen sm:h-screen sm:flex sm:overflow-hidden"
     >
       <header
-        class="md:hidden sticky top-0 z-30 bg-brand-50/95 dark:bg-neutral-900/95 backdrop-blur border-b border-stone-300 dark:border-neutral-800 px-4 py-3 flex items-center justify-between"
+        class="sm:hidden sticky top-0 z-30 bg-brand-50/95 dark:bg-neutral-900/95 backdrop-blur border-b border-stone-300 dark:border-neutral-800 px-4 py-3 flex items-center justify-between"
       >
         <button
           onclick="toggleSidebar()"
-          class="p-2 -ml-2 text-stone-700 dark:text-neutral-300"
+          class="p-2 -ml-2 text-stone-700 dark:text-neutral-300 touch-manipulation"
         >
           <i data-lucide="menu" class="w-5 h-5"></i>
         </button>
@@ -299,14 +335,14 @@
         <div class="flex items-center gap-1">
           <button
             onclick="toggleTheme()"
-            class="p-2 text-stone-600 dark:text-neutral-400"
+            class="p-2 text-stone-600 dark:text-neutral-400 touch-manipulation"
             aria-label="Alternar tema"
           >
             <i id="themeIconMobile" data-lucide="moon" class="w-5 h-5"></i>
           </button>
           <button
             onclick="logout()"
-            class="p-2 -mr-2 text-stone-600 dark:text-neutral-400"
+            class="p-2 -mr-2 text-stone-600 dark:text-neutral-400 touch-manipulation"
           >
             <i data-lucide="log-out" class="w-5 h-5"></i>
           </button>
@@ -316,100 +352,102 @@
       <div
         id="sidebarBackdrop"
         onclick="toggleSidebar()"
-        class="md:hidden hidden fixed inset-0 z-40 backdrop"
+        class="sm:hidden hidden fixed inset-0 z-40 backdrop"
       ></div>
 
       <aside
         id="sidebar"
-        class="sidebar-mobile md:transform-none fixed md:static inset-y-0 left-0 z-50 w-64 md:w-60 bg-brand-50 dark:bg-neutral-900 border-r border-stone-300 dark:border-neutral-800 flex flex-col"
+        class="sidebar-mobile sm:transform-none fixed sm:static inset-y-0 left-0 z-50 w-64 sm:w-56 lg:w-60 bg-brand-50 dark:bg-neutral-900 border-r border-stone-300 dark:border-neutral-800 flex flex-col"
       >
         <div
-          class="px-5 py-5 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between gap-2"
+          class="px-4 sm:px-5 py-4 sm:py-5 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between gap-2"
         >
           <div class="flex items-center gap-2.5 min-w-0">
             <img
               src="/static/notas/logo.png"
               alt="MAC Madeiras"
-              class="logo-img h-10 w-auto flex-shrink-0"
+              class="logo-img h-8 sm:h-10 w-auto flex-shrink-0"
             />
             <div class="brand-divider"></div>
             <span
-              class="font-bold text-lg text-stone-900 dark:text-neutral-100 tracking-tight"
+              class="font-bold text-base sm:text-lg text-stone-900 dark:text-neutral-100 tracking-tight truncate"
               >MacNF</span
             >
           </div>
           <div class="flex items-center gap-0.5 flex-shrink-0">
             <button
               onclick="toggleTheme()"
-              class="hidden md:block p-1.5 text-stone-500 hover:text-stone-800 dark:text-neutral-400 dark:hover:text-neutral-200 rounded-md hover:bg-stone-200 dark:hover:bg-neutral-800 transition"
+              class="hidden sm:block p-1.5 text-stone-500 hover:text-stone-800 dark:text-neutral-400 dark:hover:text-neutral-200 rounded-md hover:bg-stone-200 dark:hover:bg-neutral-800 transition touch-manipulation"
               aria-label="Alternar tema"
             >
               <i id="themeIconDesktop" data-lucide="moon" class="w-4 h-4"></i>
             </button>
             <button
               onclick="toggleSidebar()"
-              class="md:hidden p-1 text-stone-500 dark:text-neutral-400"
+              class="sm:hidden p-1 text-stone-500 dark:text-neutral-400 touch-manipulation"
             >
               <i data-lucide="x" class="w-5 h-5"></i>
             </button>
           </div>
         </div>
 
-        <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+        <nav
+          class="flex-1 p-2 sm:p-3 space-y-0.5 overflow-y-auto scroll-smooth"
+        >
           <button
             onclick="showTab('tab-dashboard')"
             data-tab="tab-dashboard"
-            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300 touch-manipulation"
           >
             <i
               data-lucide="layout-dashboard"
-              class="w-4 h-4 text-stone-500 dark:text-neutral-500"
+              class="w-4 h-4 text-stone-500 dark:text-neutral-500 flex-shrink-0"
             ></i>
-            Painel
+            <span class="truncate">Painel</span>
           </button>
           <button
             onclick="showTab('tab-nova')"
             data-tab="tab-nova"
-            class="nav-item estoquista-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300"
+            class="nav-item estoquista-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300 touch-manipulation"
           >
             <i
               data-lucide="file-plus"
-              class="w-4 h-4 text-stone-500 dark:text-neutral-500"
+              class="w-4 h-4 text-stone-500 dark:text-neutral-500 flex-shrink-0"
             ></i>
-            Nova nota
+            <span class="truncate">Nova nota</span>
           </button>
           <button
             onclick="showTab('tab-notas')"
             data-tab="tab-notas"
-            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300 touch-manipulation"
           >
             <i
               data-lucide="files"
-              class="w-4 h-4 text-stone-500 dark:text-neutral-500"
+              class="w-4 h-4 text-stone-500 dark:text-neutral-500 flex-shrink-0"
             ></i>
-            Notas fiscais
+            <span class="truncate">Notas fiscais</span>
           </button>
           <button
             onclick="showTab('tab-relatorio')"
             data-tab="tab-relatorio"
-            class="nav-item fiscal-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300"
+            class="nav-item fiscal-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300 touch-manipulation"
           >
             <i
               data-lucide="bar-chart-3"
-              class="w-4 h-4 text-stone-500 dark:text-neutral-500"
+              class="w-4 h-4 text-stone-500 dark:text-neutral-500 flex-shrink-0"
             ></i>
-            Relatórios
+            <span class="truncate">Relatórios</span>
           </button>
           <button
             onclick="showTab('tab-fornecedor')"
             data-tab="tab-fornecedor"
-            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300"
+            class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300 touch-manipulation"
           >
             <i
               data-lucide="building-2"
-              class="w-4 h-4 text-stone-500 dark:text-neutral-500"
+              class="w-4 h-4 text-stone-500 dark:text-neutral-500 flex-shrink-0"
             ></i>
-            Fornecedores
+            <span class="truncate">Fornecedores</span>
           </button>
         </nav>
 
@@ -419,7 +457,7 @@
           <div class="flex items-center gap-3 px-1 py-1">
             <div
               id="userAvatar"
-              class="w-9 h-9 rounded-full bg-brand-600 flex items-center justify-center text-white font-semibold text-sm flex-shrink-0"
+              class="w-8 sm:w-9 h-8 sm:h-9 rounded-full bg-brand-600 flex items-center justify-center text-white font-semibold text-xs sm:text-sm flex-shrink-0"
             >
               ?
             </div>
@@ -429,14 +467,14 @@
                 id="userName"
               ></p>
               <p
-                class="text-xs text-stone-500 dark:text-neutral-400"
+                class="text-xs text-stone-500 dark:text-neutral-400 truncate"
                 id="userRole"
               ></p>
             </div>
             <button
               onclick="logout()"
               title="Sair"
-              class="hidden md:block text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-300 p-1.5 rounded-md hover:bg-stone-200 dark:hover:bg-neutral-800 transition"
+              class="hidden sm:block text-stone-400 hover:text-stone-700 dark:text-neutral-500 dark:hover:text-neutral-300 p-1.5 rounded-md hover:bg-stone-200 dark:hover:bg-neutral-800 transition touch-manipulation"
             >
               <i data-lucide="log-out" class="w-4 h-4"></i>
             </button>
@@ -445,9 +483,9 @@
       </aside>
 
       <main
-        class="flex-1 md:overflow-y-auto bg-stone-200 dark:bg-neutral-950 md:flex md:flex-col"
+        class="flex-1 sm:overflow-y-auto bg-stone-200 dark:bg-neutral-950 sm:flex sm:flex-col"
       >
-        <div class="flex-1">
+        <div class="flex-1 pb-4 sm:pb-6">
           <!-- ===== Dashboard ===== -->
           <section id="tab-dashboard" class="tab hidden p-4 sm:p-6 lg:p-8">
             <h2
@@ -457,13 +495,11 @@
               Olá!
             </h2>
             <p
-              class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6"
+              class="text-sm text-stone-500 dark:text-neutral-400 mb-4 sm:mb-6"
               id="dashSubtitle"
             ></p>
 
-            <div
-              class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
-            >
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-5 sm:mb-6 lg:mb-8">
               <div
                 class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-5 shadow-soft"
               >
@@ -473,7 +509,7 @@
                     >Total</span
                   >
                   <div
-                    class="w-7 h-7 rounded-lg bg-stone-200 dark:bg-neutral-800 flex items-center justify-center"
+                    class="w-7 h-7 rounded-lg bg-stone-200 dark:bg-neutral-800 flex items-center justify-center flex-shrink-0"
                   >
                     <i
                       data-lucide="files"
@@ -497,7 +533,7 @@
                     >Em análise</span
                   >
                   <div
-                    class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center"
+                    class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center flex-shrink-0"
                   >
                     <i
                       data-lucide="clock"
@@ -521,7 +557,7 @@
                     >No mês</span
                   >
                   <div
-                    class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center"
+                    class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/40 flex items-center justify-center flex-shrink-0"
                   >
                     <i
                       data-lucide="check-circle-2"
@@ -545,7 +581,7 @@
                     >Lançadas</span
                   >
                   <div
-                    class="w-7 h-7 rounded-lg bg-brand-100 dark:bg-brand-800/30 flex items-center justify-center"
+                    class="w-7 h-7 rounded-lg bg-brand-100 dark:bg-brand-800/30 flex items-center justify-center flex-shrink-0"
                   >
                     <i
                       data-lucide="check-check"
@@ -566,14 +602,16 @@
               class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl shadow-soft"
             >
               <div
-                class="px-4 sm:px-5 py-4 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between"
+                class="px-4 sm:px-5 py-3 sm:py-4 border-b border-stone-300 dark:border-neutral-800 flex items-center justify-between"
               >
-                <h3 class="font-semibold text-stone-900 dark:text-neutral-100">
+                <h3
+                  class="font-semibold text-stone-900 dark:text-neutral-100 text-sm sm:text-base"
+                >
                   Notas recentes
                 </h3>
                 <button
                   onclick="showTab('tab-notas')"
-                  class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300"
+                  class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 touch-manipulation"
                 >
                   Ver todas →
                 </button>
@@ -596,7 +634,7 @@
               Cadastrar nota fiscal
             </h2>
             <p
-              class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6"
+              class="text-sm text-stone-500 dark:text-neutral-400 mb-4 sm:mb-6"
             >
               Preencha os dados e envie ao setor fiscal.
             </p>
@@ -605,8 +643,8 @@
               id="notaForm"
               class="bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 sm:p-6 max-w-3xl shadow-soft"
             >
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-                <div class="md:col-span-2">
+              <div class="grid grid-cols-1 gap-4 sm:gap-5">
+                <div>
                   <label
                     class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
                     >Fornecedor</label
@@ -617,38 +655,40 @@
                     class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
                   ></select>
                 </div>
-                <div>
-                  <label
-                    class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
-                    >Número da nota</label
-                  >
-                  <input
-                    id="nf_numero"
-                    type="text"
-                    inputmode="numeric"
-                    required
-                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
-                  />
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+                      >Número da nota</label
+                    >
+                    <input
+                      id="nf_numero"
+                      type="text"
+                      inputmode="numeric"
+                      required
+                      class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+                      >Chave de acesso</label
+                    >
+                    <input
+                      id="nf_chave"
+                      type="text"
+                      inputmode="numeric"
+                      maxlength="44"
+                      required
+                      placeholder="44 dígitos"
+                      class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm font-mono text-stone-900 dark:text-neutral-100 placeholder-stone-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label
                     class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
-                    >Chave de acesso</label
-                  >
-                  <input
-                    id="nf_chave"
-                    type="text"
-                    inputmode="numeric"
-                    maxlength="44"
-                    required
-                    placeholder="44 dígitos"
-                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm font-mono text-stone-900 dark:text-neutral-100 placeholder-stone-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
-                  />
-                </div>
-                <div class="md:col-span-2">
-                  <label
-                    class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
-                    >PDF da nota</label
+                    >PDF ou foto da nota</label
                   >
                   <div
                     class="border-2 border-dashed border-stone-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 rounded-lg p-4 hover:border-brand-400 transition"
@@ -656,13 +696,20 @@
                     <input
                       id="nf_pdf"
                       type="file"
-                      accept="application/pdf,.pdf"
+                      accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,.webp,image/*,application/pdf"
+                      capture="environment"
                       required
                       class="w-full text-sm text-stone-700 dark:text-neutral-300"
                     />
                   </div>
+                  <p
+                    class="text-xs text-stone-500 dark:text-neutral-400 mt-1.5"
+                  >
+                    Aceita PDF ou fotos (JPG, PNG, HEIC). Imagens são
+                    comprimidas automaticamente.
+                  </p>
                 </div>
-                <div class="md:col-span-2">
+                <div>
                   <label
                     class="flex justify-between text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
                   >
@@ -684,14 +731,14 @@
               <div class="mt-6 flex flex-col sm:flex-row sm:items-center gap-3">
                 <button
                   type="submit"
-                  class="w-full sm:w-auto bg-brand-600 text-white rounded-lg px-5 py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                  class="w-full sm:w-auto bg-brand-600 text-white rounded-lg px-5 py-3 sm:py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation"
                 >
                   <i data-lucide="send" class="w-4 h-4"></i>
                   Salvar e enviar ao fiscal
                 </button>
                 <button
                   type="reset"
-                  class="text-sm text-stone-600 hover:text-stone-900 dark:text-neutral-400 dark:hover:text-neutral-200 py-2"
+                  class="text-sm text-stone-600 hover:text-stone-900 dark:text-neutral-400 dark:hover:text-neutral-200 py-3 sm:py-2 touch-manipulation"
                 >
                   Limpar
                 </button>
@@ -702,7 +749,7 @@
           <!-- ===== Notas ===== -->
           <section id="tab-notas" class="tab hidden p-4 sm:p-6 lg:p-8">
             <div
-              class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6"
+              class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6"
             >
               <div>
                 <h2
@@ -718,7 +765,7 @@
               <select
                 id="filtroStatus"
                 onchange="loadNotas()"
-                class="border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm bg-brand-50 dark:bg-neutral-900 text-stone-900 dark:text-neutral-100 shadow-soft"
+                class="border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm bg-brand-50 dark:bg-neutral-900 text-stone-900 dark:text-neutral-100 shadow-soft w-full sm:w-auto"
               >
                 <option value="">Todos os status</option>
                 <option value="em_analise">Em análise</option>
@@ -727,7 +774,7 @@
             </div>
 
             <div
-              class="hidden md:block bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl overflow-hidden shadow-soft"
+              class="hidden sm:block bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl overflow-hidden shadow-soft"
             >
               <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -740,6 +787,7 @@
                       <th class="px-4 py-3 font-medium">Status</th>
                       <th class="px-4 py-3 font-medium">Criação</th>
                       <th class="px-4 py-3 font-medium">Lançamento</th>
+                      <th class="px-4 py-3 font-medium">Observação</th>
                       <th class="px-4 py-3 font-medium">PDF</th>
                       <th class="px-4 py-3 font-medium text-right">Ações</th>
                     </tr>
@@ -752,7 +800,7 @@
               </div>
             </div>
 
-            <div id="notasCards" class="md:hidden space-y-3"></div>
+            <div id="notasCards" class="sm:hidden space-y-3"></div>
           </section>
 
           <!-- ===== Relatório ===== -->
@@ -766,7 +814,7 @@
               Relatórios
             </h2>
             <p
-              class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6"
+              class="text-sm text-stone-500 dark:text-neutral-400 mb-4 sm:mb-6"
             >
               Notas lançadas por período.
             </p>
@@ -815,7 +863,7 @@
                 </div>
                 <button
                   onclick="loadRelatorio()"
-                  class="col-span-2 sm:col-span-1 bg-brand-600 text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-60"
+                  class="col-span-2 sm:col-span-1 bg-brand-600 text-white rounded-lg px-5 py-3 sm:py-2 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-60 touch-manipulation"
                 >
                   <i data-lucide="play" class="w-4 h-4"></i>
                   Gerar
@@ -834,7 +882,7 @@
               Fornecedores
             </h2>
             <p
-              class="text-sm text-stone-500 dark:text-neutral-400 mb-5 sm:mb-6"
+              class="text-sm text-stone-500 dark:text-neutral-400 mb-4 sm:mb-6"
             >
               Cadastre os fornecedores que emitem suas notas.
             </p>
@@ -877,7 +925,7 @@
                   </div>
                   <button
                     type="submit"
-                    class="w-full bg-brand-600 text-white rounded-lg py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed"
+                    class="w-full bg-brand-600 text-white rounded-lg py-3 sm:py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation"
                   >
                     Cadastrar
                   </button>
@@ -891,7 +939,7 @@
                   class="px-4 sm:px-5 py-4 border-b border-stone-300 dark:border-neutral-800"
                 >
                   <h3
-                    class="font-semibold text-stone-900 dark:text-neutral-100"
+                    class="font-semibold text-stone-900 dark:text-neutral-100 text-sm sm:text-base"
                   >
                     Cadastrados
                   </h3>
@@ -906,11 +954,92 @@
         </div>
 
         <footer
-          class="text-center py-4 px-4 text-xs text-stone-500 dark:text-neutral-500 border-t border-stone-300 dark:border-neutral-800 mt-8"
+          class="text-center py-4 px-4 text-xs text-stone-500 dark:text-neutral-500 border-t border-stone-300 dark:border-neutral-800 mt-4 sm:mt-8"
         >
           © <span id="footerYear">2026</span> MAC Madeiras · MacNF
         </footer>
       </main>
+    </div>
+
+    <!-- ===== MODAL DE EDIÇÃO ===== -->
+    <div
+      id="editModal"
+      class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+    >
+      <div
+        class="bg-brand-50 dark:bg-neutral-900 rounded-2xl shadow-soft-lg p-6 w-full max-w-md border border-stone-300 dark:border-neutral-800 max-h-[90vh] overflow-y-auto"
+      >
+        <h3
+          class="text-lg font-semibold text-stone-900 dark:text-neutral-100 mb-4"
+        >
+          Editar nota
+        </h3>
+        <form id="editForm" class="space-y-4">
+          <input type="hidden" id="edit_id" />
+          <div>
+            <label
+              class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+              >Número da nota</label
+            >
+            <input
+              id="edit_numero"
+              type="text"
+              required
+              class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+              >Chave de acesso</label
+            >
+            <input
+              id="edit_chave"
+              type="text"
+              maxlength="44"
+              required
+              class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm font-mono text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+            />
+          </div>
+          <div>
+            <label
+              class="flex justify-between text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+            >
+              <span>Observação</span>
+              <span
+                class="text-xs text-stone-400 dark:text-neutral-500"
+                id="editObsCount"
+                >0 / 2000</span
+              >
+            </label>
+            <textarea
+              id="edit_obs"
+              maxlength="2000"
+              rows="4"
+              oninput="atualizarContadorEdit()"
+              class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+            ></textarea>
+          </div>
+          <p class="text-xs text-stone-500 dark:text-neutral-400">
+            Para trocar o PDF/foto da nota, exclua e cadastre de novo.
+          </p>
+          <div class="flex gap-3 pt-2">
+            <button
+              type="button"
+              onclick="fecharEditModal()"
+              class="flex-1 border border-stone-300 dark:border-neutral-700 rounded-lg py-3 sm:py-2.5 text-sm text-stone-700 dark:text-neutral-300 hover:bg-stone-100 dark:hover:bg-neutral-800 transition touch-manipulation"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="flex-1 bg-brand-600 text-white rounded-lg py-3 sm:py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation"
+            >
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
 
     <!-- Toast -->
@@ -931,11 +1060,9 @@
       let fornecedoresCache = null;
       let ultimoRelatorio = null;
 
-      // Ano do footer dinâmico
       document.getElementById("footerYear").textContent =
         new Date().getFullYear();
 
-      // ---------- tema ----------
       function isDark() {
         return document.documentElement.classList.contains("dark");
       }
@@ -955,7 +1082,6 @@
         updateThemeIcons();
       }
 
-      // ---------- helpers ----------
       function fmtDate(s) {
         if (!s) return "—";
         return new Date(s).toLocaleString("pt-BR", {
@@ -1017,7 +1143,6 @@
         }
         const res = await fetch(API + path, { method, headers, body });
 
-        // Token inválido ou expirado: faz logout automático
         if (res.status === 401) {
           showToast("Sessão expirada. Faça login novamente.", "error");
           setTimeout(() => logout(), 1500);
@@ -1054,12 +1179,19 @@
         lucide.createIcons();
       }
 
-      // ---------- saudação ----------
       function getSaudacao() {
         const h = new Date().getHours();
         if (h < 12) return "Bom dia";
         if (h < 18) return "Boa tarde";
         return "Boa noite";
+      }
+
+      function atualizarContadorEdit() {
+        const obs = document.getElementById("edit_obs");
+        const contador = document.getElementById("editObsCount");
+        if (contador) {
+          contador.textContent = `${obs.value.length} / 2000`;
+        }
       }
 
       document
@@ -1133,7 +1265,7 @@
         });
         const el = document.getElementById(id);
         el.classList.remove("hidden");
-        void el.offsetWidth; // força reflow pra reiniciar animação
+        void el.offsetWidth;
         el.classList.add("tab-enter");
 
         document
@@ -1201,7 +1333,7 @@
 
       async function loadFornecedores() {
         try {
-          const list = await getFornecedores(true); // sempre busca atualizado nessa tela
+          const list = await getFornecedores(true);
           document.getElementById("fornList").innerHTML = list.length
             ? list
                 .map((f) => {
@@ -1218,7 +1350,7 @@
                     <p class="text-xs text-stone-500 dark:text-neutral-400 font-mono">${f.cnpj}</p>
                 </div>
                 <button onclick="deleteFornecedor(${f.id}, '${nomeEscapado}')"
-                    class="text-stone-400 hover:text-red-600 dark:text-neutral-500 dark:hover:text-red-400 p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                    class="text-stone-400 hover:text-red-600 dark:text-neutral-500 dark:hover:text-red-400 p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-950/30 transition touch-manipulation"
                     title="Excluir fornecedor">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
@@ -1283,7 +1415,6 @@
           `${e.target.value.length} / 2000`;
       });
 
-      // Máscara automática de CNPJ
       document.getElementById("forn_cnpj").addEventListener("input", (e) => {
         let v = e.target.value.replace(/\D/g, "").slice(0, 14);
         if (v.length > 12)
@@ -1323,6 +1454,7 @@
           }
         });
 
+      // ===== FUNÇÃO LOAD NOTAS CORRIGIDA =====
       async function loadNotas() {
         document.getElementById("notasSubtitle").textContent = user.is_fiscal
           ? "Todas as notas do sistema."
@@ -1333,6 +1465,7 @@
           let list = data.results || data;
           if (status) list = list.filter((n) => n.status === status);
 
+          // ===== TABELA DESKTOP =====
           document.getElementById("notasBody").innerHTML = list.length
             ? list
                 .map(
@@ -1356,25 +1489,48 @@
                     }
                 </td>
                 <td class="px-4 py-3 align-top">
-                    <a href="${n.pdf_nota}" target="_blank" class="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 inline-flex items-center gap-1">
+                    ${
+                      n.observacao
+                        ? `<div class="text-xs text-stone-600 dark:text-neutral-400 max-w-xs whitespace-pre-wrap break-words">${n.observacao}</div>`
+                        : '<span class="text-xs text-stone-400 dark:text-neutral-500">—</span>'
+                    }
+                </td>
+                <td class="px-4 py-3 align-top">
+                    <a href="${n.pdf_nota}" target="_blank" class="text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 inline-flex items-center gap-1 touch-manipulation">
                         <i data-lucide="external-link" class="w-3.5 h-3.5"></i> abrir
                     </a>
                 </td>
                 <td class="px-4 py-3 text-right align-top">
-                    ${
-                      user.is_fiscal && n.status !== "lancada"
-                        ? `<button onclick="lancar(${n.id})" class="bg-emerald-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-emerald-700 shadow-soft inline-flex items-center gap-1">
-                              <i data-lucide="check" class="w-3.5 h-3.5"></i> Lançar
-                           </button>`
-                        : '<span class="text-xs text-stone-400 dark:text-neutral-500">—</span>'
-                    }
+                    <div class="flex items-center justify-end gap-1 flex-wrap">
+                        ${
+                          user.is_fiscal && n.status !== "lancada"
+                            ? `<button onclick="lancar(${n.id})" class="bg-emerald-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-emerald-700 shadow-soft inline-flex items-center gap-1 touch-manipulation">
+                                  <i data-lucide="check" class="w-3.5 h-3.5"></i> Lançar
+                               </button>`
+                            : ""
+                        }
+                        ${
+                          user.is_estoquista &&
+                          n.status === "em_analise" &&
+                          n.criado_por === user.username
+                            ? `<button onclick="editarNota(${n.id})" class="text-stone-500 hover:text-brand-600 dark:text-neutral-400 dark:hover:text-brand-400 p-2 rounded-md hover:bg-stone-100 dark:hover:bg-neutral-800 transition touch-manipulation" title="Editar">
+                          <i data-lucide="pencil" class="w-4 h-4"></i>
+                       </button>
+                       <button onclick="excluirNota(${n.id}, '${n.numero_nota}')" class="text-stone-500 hover:text-red-600 dark:text-neutral-400 dark:hover:text-red-400 p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-950/30 transition touch-manipulation" title="Excluir">
+                          <i data-lucide="trash-2" class="w-4 h-4"></i>
+                       </button>`
+                            : ""
+                        }
+                        ${!user.is_fiscal && !user.is_estoquista ? '<span class="text-xs text-stone-400 dark:text-neutral-500">—</span>' : ""}
+                    </div>
                 </td>
             </tr>
         `,
                 )
                 .join("")
-            : `<tr><td colspan="7">${emptyState("Nenhuma nota encontrada.", "files")}</td></tr>`;
+            : `<tr><td colspan="8">${emptyState("Nenhuma nota encontrada.", "files")}</td></tr>`;
 
+          // ===== CARDS MOBILE (COM BOTÕES EDITAR/EXCLUIR) =====
           document.getElementById("notasCards").innerHTML = list.length
             ? list
                 .map(
@@ -1382,7 +1538,7 @@
             <div class="card-hover bg-brand-50 dark:bg-neutral-900 border border-stone-300 dark:border-neutral-800 rounded-xl p-4 shadow-soft">
                 <div class="flex items-start justify-between gap-3 mb-2">
                     <div class="min-w-0 flex-1">
-                        <p class="text-sm font-semibold text-stone-900 dark:text-neutral-100">NF ${n.numero_nota}</p>
+                        <p class="text-sm font-semibold text-stone-900 dark:text-neutral-100 truncate">NF ${n.numero_nota}</p>
                         <p class="text-sm text-stone-600 dark:text-neutral-400 truncate">${n.fornecedor_nome}</p>
                     </div>
                     ${badgeStatus(n.status)}
@@ -1392,6 +1548,16 @@
                         <i data-lucide="file-plus" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-stone-400 dark:text-neutral-500"></i>
                         <span>Criada por <span class="font-medium text-stone-800 dark:text-neutral-200">${n.criado_por}</span> em ${fmtDate(n.data_criacao)}</span>
                     </div>
+                    ${
+                      n.observacao
+                        ? `
+                        <div class="flex items-start gap-2 text-stone-600 dark:text-neutral-400">
+                            <i data-lucide="message-square" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-stone-400 dark:text-neutral-500"></i>
+                            <span class="text-stone-700 dark:text-neutral-300 break-words whitespace-pre-wrap overflow-hidden w-full observacao-text">${n.observacao}</span>
+                        </div>
+                    `
+                        : ""
+                    }
                     ${
                       n.data_lancamento
                         ? `
@@ -1404,16 +1570,32 @@
                     }
                 </div>
                 <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-stone-200 dark:border-neutral-800">
-                    <a href="${n.pdf_nota}" target="_blank" class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 inline-flex items-center gap-1 px-2 py-1">
+                    <a href="${n.pdf_nota}" target="_blank" class="text-sm text-brand-600 hover:text-brand-700 dark:text-brand-400 dark:hover:text-brand-300 inline-flex items-center gap-1 px-2 py-1 touch-manipulation">
                         <i data-lucide="external-link" class="w-4 h-4"></i> Abrir PDF
                     </a>
-                    ${
-                      user.is_fiscal && n.status !== "lancada"
-                        ? `<button onclick="lancar(${n.id})" class="ml-auto bg-emerald-600 text-white text-sm rounded-md px-3 py-1.5 hover:bg-emerald-700 shadow-soft inline-flex items-center gap-1">
-                              <i data-lucide="check" class="w-4 h-4"></i> Lançar
-                           </button>`
-                        : ""
-                    }
+                    <div class="flex items-center gap-1 ml-auto">
+                        ${
+                          user.is_fiscal && n.status !== "lancada"
+                            ? `<button onclick="lancar(${n.id})" class="bg-emerald-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-emerald-700 shadow-soft inline-flex items-center gap-1 touch-manipulation">
+                                  <i data-lucide="check" class="w-4 h-4"></i> Lançar
+                               </button>`
+                            : ""
+                        }
+                        ${
+                          user.is_estoquista &&
+                          n.status === "em_analise" &&
+                          n.criado_por === user.username
+                            ? `
+                            <button onclick="editarNota(${n.id})" class="text-stone-500 hover:text-brand-600 dark:text-neutral-400 dark:hover:text-brand-400 p-2 rounded-md hover:bg-stone-100 dark:hover:bg-neutral-800 transition touch-manipulation" title="Editar">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="excluirNota(${n.id}, '${n.numero_nota}')" class="text-stone-500 hover:text-red-600 dark:text-neutral-400 dark:hover:text-red-400 p-2 rounded-md hover:bg-red-50 dark:hover:bg-red-950/30 transition touch-manipulation" title="Excluir">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                            `
+                            : ""
+                        }
+                    </div>
                 </div>
             </div>
         `,
@@ -1450,6 +1632,101 @@
         }
       }
 
+      async function excluirNota(id, numero) {
+        if (
+          !confirm(`Excluir a nota ${numero}?\n\nIsso não pode ser desfeito.`)
+        )
+          return;
+        try {
+          await api("DELETE", `/notas/${id}/`);
+          showToast("Nota excluída.", "success");
+
+          // INVALIDA O CACHE DOS FORNECEDORES
+          fornecedoresCache = null;
+
+          // Recarrega as listas
+          loadNotas();
+          loadDashboard();
+
+          // Se estiver na tela de nova nota, recarrega o select de fornecedores
+          const tabNova = document.getElementById("tab-nova");
+          if (tabNova && !tabNova.classList.contains("hidden")) {
+            loadFornecedoresIntoSelect();
+          }
+        } catch (e) {
+          let msg = "Erro ao excluir.";
+          try {
+            const parsed = JSON.parse(e.message);
+            if (parsed.detail) msg = parsed.detail;
+          } catch {}
+          showToast(msg, "error");
+        }
+      }
+
+      // ===== FUNÇÃO EDITAR NOTA CORRIGIDA =====
+      async function editarNota(id) {
+        try {
+          const data = await api("GET", `/notas/${id}/`);
+          document.getElementById("edit_id").value = data.id;
+          document.getElementById("edit_numero").value = data.numero_nota;
+          document.getElementById("edit_chave").value = data.chave_acesso;
+
+          // CORREÇÃO: Carrega a observação no textarea
+          const obsTextarea = document.getElementById("edit_obs");
+          obsTextarea.value = data.observacao || "";
+
+          // Atualiza o contador
+          atualizarContadorEdit();
+
+          document.getElementById("editModal").classList.remove("hidden");
+        } catch (e) {
+          showToast("Erro ao carregar nota.", "error");
+        }
+      }
+
+      function fecharEditModal() {
+        document.getElementById("editModal").classList.add("hidden");
+      }
+
+      document
+        .getElementById("editForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = e.target.querySelector('button[type="submit"]');
+          setBtnLoading(btn, true);
+          const id = document.getElementById("edit_id").value;
+          try {
+            await api("PATCH", `/notas/${id}/`, {
+              numero_nota: document.getElementById("edit_numero").value,
+              chave_acesso: document.getElementById("edit_chave").value,
+              observacao: document.getElementById("edit_obs").value,
+            });
+            showToast("Nota atualizada!", "success");
+            fecharEditModal();
+            loadNotas();
+          } catch (err) {
+            let msg = "Erro ao atualizar.";
+            try {
+              const parsed = JSON.parse(err.message);
+              if (parsed.detail) msg = parsed.detail;
+              else if (parsed.chave_acesso) msg = parsed.chave_acesso[0];
+              else if (parsed.numero_nota) msg = parsed.numero_nota[0];
+            } catch {}
+            showToast(msg, "error");
+          } finally {
+            setBtnLoading(btn, false);
+          }
+        });
+
+      document.addEventListener("keydown", (e) => {
+        if (
+          e.key === "Escape" &&
+          !document.getElementById("editModal").classList.contains("hidden")
+        ) {
+          fecharEditModal();
+        }
+      });
+
       async function loadRelatorio() {
         const ano = document.getElementById("rel_ano").value;
         const mes = document.getElementById("rel_mes").value;
@@ -1469,7 +1746,7 @@
                     <p class="text-sm text-stone-500 dark:text-neutral-500 mt-1">notas lançadas</p>
                 </div>
                 <button onclick="exportarPDF()" ${podeExportar ? "" : "disabled"}
-                    class="bg-brand-600 text-white rounded-lg px-4 py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="bg-brand-600 text-white rounded-lg px-4 py-3 sm:py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation">
                     <i data-lucide="file-down" class="w-4 h-4"></i>
                     Exportar PDF
                 </button>
@@ -1588,7 +1865,7 @@
       }
 
       window.addEventListener("resize", () => {
-        if (window.innerWidth >= 768) closeSidebar();
+        if (window.innerWidth >= 640) closeSidebar();
       });
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") closeSidebar();
@@ -1597,13 +1874,11 @@
       lucide.createIcons();
       updateThemeIcons();
       if (token && user) {
-        // Valida o token cacheado fazendo uma requisição rápida ao backend
         fetch(API + "/notas/stats/", {
           headers: { Authorization: `Token ${token}` },
         })
           .then((res) => {
             if (res.status === 401) {
-              // Token velho/inválido: limpa silenciosamente e mostra login
               localStorage.removeItem("macnf_token");
               localStorage.removeItem("macnf_user");
             } else {
@@ -1611,7 +1886,6 @@
             }
           })
           .catch(() => {
-            // Erro de rede: tenta mostrar o app mesmo assim, a próxima ação trata
             showApp();
           });
       }

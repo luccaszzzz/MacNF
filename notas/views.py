@@ -1,11 +1,16 @@
 from django.utils import timezone
 from django.db.models import Count
 from django.db.models.deletion import ProtectedError
+from django.core.files.base import ContentFile
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+
+from PIL import Image
+from io import BytesIO
 
 from .models import Fornecedor, NotaFiscal, HistoricoNotaFiscal
 from .serializers import FornecedorSerializer, NotaFiscalSerializer
@@ -69,14 +74,64 @@ class NotaFiscalViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
+        """Cria nota — comprime imagens automaticamente antes de salvar."""
+        arquivo = self.request.FILES.get("pdf_nota")
+
+        # Se for imagem, comprime antes de salvar
+        if arquivo and arquivo.content_type.startswith("image/"):
+            try:
+                img = Image.open(arquivo)
+
+                # Converte HEIC/outros pra JPEG
+                if img.mode in ("RGBA", "LA", "P"):
+                    img = img.convert("RGB")
+
+                # Redimensiona se for muito grande (max 2000px no maior lado)
+                img.thumbnail((2000, 2000), Image.Resampling.LANCZOS)
+
+                # Salva como JPEG comprimido em memória
+                buffer = BytesIO()
+                img.save(buffer, format="JPEG", quality=85, optimize=True)
+                buffer.seek(0)
+
+                # Substitui o arquivo original pelo comprimido
+                nome_novo = arquivo.name.rsplit(".", 1)[0] + ".jpg"
+                arquivo_comprimido = ContentFile(buffer.read(), name=nome_novo)
+                serializer.validated_data["pdf_nota"] = arquivo_comprimido
+            except Exception:
+                # Se falhar (arquivo corrompido, etc.), salva original mesmo
+                pass
+
         nota = serializer.save(
             criado_por=self.request.user,
             status="em_analise",
             data_envio_fiscal=timezone.now(),
         )
         HistoricoNotaFiscal.objects.create(
-            nota=nota, acao="criada e enviada ao fiscal", usuario=self.request.user
+            nota=nota,
+            acao="criada e enviada ao fiscal",
+            usuario=self.request.user,
         )
+
+    def perform_update(self, serializer):
+        """Edita nota — só permite enquanto status='em_analise'."""
+        nota = self.get_object()
+        if nota.status == "lancada":
+            raise PermissionDenied("Nota lançada não pode ser editada.")
+
+        nota_atualizada = serializer.save()
+        HistoricoNotaFiscal.objects.create(
+            nota=nota_atualizada,
+            acao="editada",
+            usuario=self.request.user,
+            detalhes="Dados da nota foram alterados pelo estoquista.",
+        )
+
+    def perform_destroy(self, instance):
+        """Exclui nota — só permite enquanto status='em_analise'."""
+        if instance.status == "lancada":
+            raise PermissionDenied("Nota lançada não pode ser excluída.")
+        instance.delete()
 
     @action(detail=True, methods=["post"])
     def lancar(self, request, pk=None):

@@ -21,6 +21,7 @@ class FornecedorPermission(BasePermission):
             return False
         return is_estoquista(request.user) or is_fiscal(request.user)
 
+
 class NotaFiscalPermission(BasePermission):
     """
     Estoquista:
@@ -35,8 +36,6 @@ class NotaFiscalPermission(BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        if request.method == "DELETE":
-            return request.user.is_superuser
 
         # Ações exclusivas do fiscal
         if view.action in ("lancar", "relatorio"):
@@ -46,15 +45,20 @@ class NotaFiscalPermission(BasePermission):
         if view.action == "create":
             return is_estoquista(request.user)
 
-        # Leitura e demais ações: ambos autenticados
+        # Leitura, edição, exclusão: ambos autenticados — verifica nota a nota
         return True
 
     def has_object_permission(self, request, view, obj):
+        # Fiscal pode tudo nos objetos
         if is_fiscal(request.user):
-            return True  # fiscal pode tudo nos objetos
-        # Estoquista: só mexe nas próprias notas e só se não lançada
+            return True
+
+        # Estoquista: só mexe nas próprias notas
         if obj.criado_por != request.user:
             return False
+
+        # Estoquista não pode editar/excluir nota lançada
         if request.method not in SAFE_METHODS and obj.status == "lancada":
             return False
+
         return True
