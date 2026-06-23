@@ -1,0 +1,163 @@
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  background-color: #e7e5e4;
+  transition: background-color 0.2s ease;
+}
+.dark body {
+  background-color: #0a0a0a;
+}
+
+.nav-item.active {
+  background-color: #faf5f0;
+  color: #5a3e2a;
+  font-weight: 500;
+}
+.nav-item.active i {
+  color: #5a3e2a;
+}
+.nav-item:hover {
+  background-color: #f5f5f4;
+}
+.dark .nav-item.active {
+  background-color: #1c1917;
+  color: #d6b896;
+}
+.dark .nav-item.active i {
+  color: #d6b896;
+}
+.dark .nav-item:hover {
+  background-color: #262626;
+}
+
+@media (max-width: 640px) {
+  button,
+  .btn,
+  .nav-item {
+    min-height: 48px;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+  .tab {
+    padding: 1rem !important;
+  }
+  .card-hover {
+    touch-action: manipulation;
+  }
+  .observacao-text {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tab {
+    padding: 1.5rem !important;
+  }
+}
+
+.sidebar-mobile {
+  transform: translateX(-100%);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sidebar-mobile.open {
+  transform: translateX(0);
+}
+.backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes tabFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.login-card {
+  animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.login-bg {
+  animation: fadeIn 0.4s ease-out both;
+}
+.tab-enter {
+  animation: tabFade 0.28s ease-out;
+}
+
+.card-hover {
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+.card-hover:hover {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+.card-hover:active {
+  transform: scale(0.98);
+}
+
+.row-hover:hover {
+  background-color: #f5f5f4;
+}
+.dark .row-hover:hover {
+  background-color: #262626;
+}
+
+.logo-img {
+  filter: none;
+}
+.dark .logo-img {
+  filter: brightness(1.3);
+}
+
+.brand-divider {
+  width: 1px;
+  background-color: #d6d3d1;
+  align-self: stretch;
+}
+.dark .brand-divider {
+  background-color: #404040;
+}
+
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}

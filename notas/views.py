@@ -19,6 +19,7 @@ from .permissions import (
     NotaFiscalPermission,
     is_fiscal,
     is_estoquista,
+    is_compras,
 )
 
 
@@ -36,6 +37,7 @@ class CustomAuthToken(ObtainAuthToken):
                 "username": user.username,
                 "is_fiscal": is_fiscal(user),
                 "is_estoquista": is_estoquista(user),
+                "is_compras": is_compras(user),
             }
         )
 
@@ -66,7 +68,7 @@ class NotaFiscalViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = NotaFiscal.objects.all().select_related(
-            "fornecedor", "criado_por", "lancada_por"
+            "fornecedor", "criado_por", "lancada_por", "observacao_resposta_por"
         )
         # Estoquista (não-admin) só vê suas próprias notas
         if is_estoquista(self.request.user) and not self.request.user.is_superuser:
@@ -118,14 +120,27 @@ class NotaFiscalViewSet(viewsets.ModelViewSet):
         nota = self.get_object()
         if nota.status == "lancada":
             raise PermissionDenied("Nota lançada não pode ser editada.")
-
         nota_atualizada = serializer.save()
-        HistoricoNotaFiscal.objects.create(
-            nota=nota_atualizada,
-            acao="editada",
-            usuario=self.request.user,
-            detalhes="Dados da nota foram alterados pelo estoquista.",
-        )
+
+        # Se o fiscal respondeu à observação, registra autor e data e cria histórico específico
+        resposta = serializer.validated_data.get("observacao_resposta") if hasattr(serializer, "validated_data") else None
+        if resposta and is_fiscal(self.request.user):
+            nota_atualizada.observacao_resposta_por = self.request.user
+            nota_atualizada.observacao_resposta_data = timezone.now()
+            nota_atualizada.save()
+            HistoricoNotaFiscal.objects.create(
+                nota=nota_atualizada,
+                acao="resposta à observação",
+                usuario=self.request.user,
+                detalhes=resposta,
+            )
+        else:
+            HistoricoNotaFiscal.objects.create(
+                nota=nota_atualizada,
+                acao="editada",
+                usuario=self.request.user,
+                detalhes="Dados da nota foram alterados pelo estoquista.",
+            )
 
     def perform_destroy(self, instance):
         """Exclui nota — só permite enquanto status='em_analise'."""

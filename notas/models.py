@@ -26,8 +26,28 @@ class NotaFiscal(models.Model):
     )
     numero_nota = models.CharField(max_length=50)
     chave_acesso = models.CharField(max_length=44, unique=True)
+    loja = models.CharField(
+        max_length=20,
+        choices=[
+            ("canguaretama", "Canguaretama"),
+            ("pipa", "Praia de Pipa"),
+            ("gostoso", "São Miguel do Gostoso"),
+        ],
+        default="canguaretama",
+    )
     pdf_nota = models.FileField(upload_to="notas/%Y/%m/")
     observacao = models.TextField(max_length=2000, blank=True)
+    observacao_resposta = models.TextField(blank=True)
+
+    observacao_resposta_por = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="respostas_observacao",
+    )
+
+    observacao_resposta_data = models.DateTimeField(null=True, blank=True)
 
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pendente")
 

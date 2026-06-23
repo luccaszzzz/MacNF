@@ -63,6 +63,7 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
     fornecedor_nome = serializers.CharField(source="fornecedor.nome", read_only=True)
     criado_por = serializers.StringRelatedField(read_only=True)
     lancada_por = serializers.StringRelatedField(read_only=True)
+    observacao_resposta_por = serializers.StringRelatedField(read_only=True)
     historico = HistoricoSerializer(many=True, read_only=True)
 
     class Meta:
@@ -73,6 +74,10 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
             "fornecedor_nome",
             "numero_nota",
             "chave_acesso",
+            "observacao_resposta",
+            "observacao_resposta_por",
+            "observacao_resposta_data",
+            "loja",
             "pdf_nota",
             "observacao",
             "status",
@@ -90,6 +95,8 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
             "data_envio_fiscal",
             "data_lancamento",
             "lancada_por",
+            "observacao_resposta_por",
+            "observacao_resposta_data",
         ]
 
     def validate_chave_acesso(self, value):

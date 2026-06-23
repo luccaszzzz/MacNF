@@ -7,6 +7,8 @@
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <meta name="theme-color" content="#6e4c34" />
+    <link rel="icon" href="/static/notas/logo.png" sizes="32x32" type="image/png" />
+    <link rel="shortcut icon" href="/static/notas/logo.png" sizes="32x32" type="image/png" />
     <title>MacNF - Gestor de Notas Fiscais</title>
 
     <script>
@@ -52,171 +54,7 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <style>
-      body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-        -webkit-tap-highlight-color: transparent;
-        background-color: #e7e5e4;
-        transition: background-color 0.2s ease;
-      }
-      .dark body {
-        background-color: #0a0a0a;
-      }
-
-      .nav-item.active {
-        background-color: #faf5f0;
-        color: #5a3e2a;
-        font-weight: 500;
-      }
-      .nav-item.active i {
-        color: #5a3e2a;
-      }
-      .nav-item:hover {
-        background-color: #f5f5f4;
-      }
-      .dark .nav-item.active {
-        background-color: #1c1917;
-        color: #d6b896;
-      }
-      .dark .nav-item.active i {
-        color: #d6b896;
-      }
-      .dark .nav-item:hover {
-        background-color: #262626;
-      }
-
-      @media (max-width: 640px) {
-        button,
-        .btn,
-        .nav-item {
-          min-height: 48px;
-        }
-        input,
-        select,
-        textarea {
-          font-size: 16px !important;
-        }
-        .tab {
-          padding: 1rem !important;
-        }
-        .card-hover {
-          touch-action: manipulation;
-        }
-        .observacao-text {
-          word-break: break-word;
-          overflow-wrap: break-word;
-          hyphens: auto;
-        }
-      }
-
-      @media (min-width: 641px) and (max-width: 1024px) {
-        .tab {
-          padding: 1.5rem !important;
-        }
-      }
-
-      .sidebar-mobile {
-        transform: translateX(-100%);
-        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      }
-      .sidebar-mobile.open {
-        transform: translateX(0);
-      }
-      .backdrop {
-        background: rgba(0, 0, 0, 0.5);
-        -webkit-backdrop-filter: blur(4px);
-        backdrop-filter: blur(4px);
-      }
-
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(28px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-      @keyframes tabFade {
-        from {
-          opacity: 0;
-          transform: translateY(6px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .login-card {
-        animation: slideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
-      }
-      .login-bg {
-        animation: fadeIn 0.4s ease-out both;
-      }
-      .tab-enter {
-        animation: tabFade 0.28s ease-out;
-      }
-
-      .card-hover {
-        transition:
-          box-shadow 0.2s ease,
-          transform 0.2s ease;
-      }
-      .card-hover:hover {
-        box-shadow:
-          0 4px 6px -1px rgba(0, 0, 0, 0.1),
-          0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      }
-      .card-hover:active {
-        transform: scale(0.98);
-      }
-
-      .row-hover:hover {
-        background-color: #f5f5f4;
-      }
-      .dark .row-hover:hover {
-        background-color: #262626;
-      }
-
-      .logo-img {
-        filter: none;
-      }
-      .dark .logo-img {
-        filter: brightness(1.3);
-      }
-
-      .brand-divider {
-        width: 1px;
-        background-color: #d6d3d1;
-        align-self: stretch;
-      }
-      .dark .brand-divider {
-        background-color: #404040;
-      }
-
-      .scroll-smooth {
-        scroll-behavior: smooth;
-      }
-
-      input[type="text"],
-      input[type="password"],
-      input[type="number"],
-      select,
-      textarea {
-        -webkit-appearance: none;
-        appearance: none;
-      }
-    </style>
+    <link rel="stylesheet" href="/static/notas/style.css" />
   </head>
   <body class="text-stone-800 dark:text-neutral-100">
     <!-- ============ LOGIN ============ -->
@@ -408,7 +246,7 @@
           <button
             onclick="showTab('tab-nova')"
             data-tab="tab-nova"
-            class="nav-item estoquista-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300 touch-manipulation"
+            class="nav-item estoquista-only compras-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-stone-700 dark:text-neutral-300 touch-manipulation"
           >
             <i
               data-lucide="file-plus"
@@ -626,7 +464,7 @@
           <!-- ===== Nova nota ===== -->
           <section
             id="tab-nova"
-            class="tab hidden estoquista-only p-4 sm:p-6 lg:p-8"
+            class="tab hidden estoquista-only compras-only p-4 sm:p-6 lg:p-8"
           >
             <h2
               class="text-xl sm:text-2xl font-semibold text-stone-900 dark:text-neutral-100 mb-1"
@@ -711,6 +549,22 @@
                 </div>
                 <div>
                   <label
+                    class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+                    >Loja de destino</label
+                  >
+                  <select
+                    id="nf_loja"
+                    required
+                    class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+                  >
+                    <option value="">— selecione uma loja —</option>
+                    <option value="canguaretama">Canguaretama</option>
+                    <option value="pipa">Praia de Pipa</option>
+                    <option value="gostoso">São Miguel do Gostoso</option>
+                  </select>
+                </div>
+                <div>
+                  <label
                     class="flex justify-between text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
                   >
                     <span>Observação</span>
@@ -762,15 +616,27 @@
                   id="notasSubtitle"
                 ></p>
               </div>
-              <select
-                id="filtroStatus"
-                onchange="loadNotas()"
-                class="border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm bg-brand-50 dark:bg-neutral-900 text-stone-900 dark:text-neutral-100 shadow-soft w-full sm:w-auto"
-              >
-                <option value="">Todos os status</option>
-                <option value="em_analise">Em análise</option>
-                <option value="lancada">Lançadas</option>
-              </select>
+              <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                <select
+                  id="filtroStatus"
+                  onchange="loadNotas()"
+                  class="border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm bg-brand-50 dark:bg-neutral-900 text-stone-900 dark:text-neutral-100 shadow-soft w-full sm:w-auto text-center"
+                >
+                  <option value="">Todos os status</option>
+                  <option value="em_analise">Em análise</option>
+                  <option value="lancada">Lançadas</option>
+                </select>
+                <select
+                  id="filtroLoja"
+                  onchange="loadNotas()"
+                  class="border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm bg-brand-50 dark:bg-neutral-900 text-stone-900 dark:text-neutral-100 shadow-soft w-full sm:w-auto text-center"
+                >
+                  <option value="">Todas as lojas</option>
+                  <option value="canguaretama">Canguaretama</option>
+                  <option value="pipa">Praia de Pipa</option>
+                  <option value="gostoso">São Miguel do Gostoso</option>
+                </select>
+              </div>
             </div>
 
             <div
@@ -787,6 +653,7 @@
                       <th class="px-4 py-3 font-medium">Status</th>
                       <th class="px-4 py-3 font-medium">Criação</th>
                       <th class="px-4 py-3 font-medium">Lançamento</th>
+                      <th class="px-4 py-3 font-medium">Loja</th>
                       <th class="px-4 py-3 font-medium">Observação</th>
                       <th class="px-4 py-3 font-medium">PDF</th>
                       <th class="px-4 py-3 font-medium text-right">Ações</th>
@@ -1003,6 +870,21 @@
           </div>
           <div>
             <label
+              class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
+              >Loja de destino</label
+            >
+            <select
+              id="edit_loja"
+              required
+              class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+            >
+              <option value="canguaretama">Canguaretama</option>
+              <option value="pipa">Praia de Pipa</option>
+              <option value="gostoso">São Miguel do Gostoso</option>
+            </select>
+          </div>
+          <div>
+            <label
               class="flex justify-between text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5"
             >
               <span>Observação</span>
@@ -1017,6 +899,16 @@
               maxlength="2000"
               rows="4"
               oninput="atualizarContadorEdit()"
+              class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+            ></textarea>
+          </div>
+          <!-- Resposta do fiscal (visível apenas para fiscal) -->
+          <div id="edit_resposta_wrapper">
+            <label class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5">Resposta do fiscal</label>
+            <textarea
+              id="edit_resposta"
+              maxlength="2000"
+              rows="3"
               class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
             ></textarea>
           </div>
@@ -1037,6 +929,24 @@
             >
               Salvar
             </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal de resposta (apenas textarea) -->
+    <div id="responseModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+      <div class="bg-brand-50 dark:bg-neutral-900 rounded-2xl shadow-soft-lg p-6 w-full max-w-md border border-stone-300 dark:border-neutral-800 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-lg font-semibold text-stone-900 dark:text-neutral-100 mb-4">Responder observação</h3>
+        <form id="responseForm" class="space-y-4">
+          <input type="hidden" id="response_id" />
+          <div>
+            <label class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5">Resposta do fiscal</label>
+            <textarea id="response_text" maxlength="2000" rows="5" required class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"></textarea>
+          </div>
+          <div class="flex gap-3 pt-2">
+            <button type="button" onclick="fecharResponseModal()" class="flex-1 border border-stone-300 dark:border-neutral-700 rounded-lg py-3 sm:py-2.5 text-sm text-stone-700 dark:text-neutral-300 hover:bg-stone-100 dark:hover:bg-neutral-800 transition touch-manipulation">Cancelar</button>
+            <button type="submit" class="flex-1 bg-brand-600 text-white rounded-lg py-3 sm:py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation">Enviar resposta</button>
           </div>
         </form>
       </div>
@@ -1092,6 +1002,59 @@
           minute: "2-digit",
         });
       }
+
+      // ===== Modal de resposta do fiscal =====
+      function abrirResponder(id) {
+        return (async () => {
+          try {
+            const data = await api("GET", `/notas/${id}/`);
+            document.getElementById("response_id").value = data.id;
+            document.getElementById("response_text").value = data.observacao_resposta || "";
+            document.getElementById("responseModal").classList.remove("hidden");
+            // focus
+            setTimeout(() => document.getElementById("response_text").focus(), 120);
+          } catch (e) {
+            showToast("Erro ao carregar nota.", "error");
+          }
+        })();
+      }
+
+      function fecharResponseModal() {
+        document.getElementById("responseModal").classList.add("hidden");
+      }
+
+      document.getElementById("responseForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button[type="submit"]');
+        setBtnLoading(btn, true);
+        const id = document.getElementById("response_id").value;
+        try {
+          await api("PATCH", `/notas/${id}/`, {
+            observacao_resposta: document.getElementById("response_text").value,
+          });
+          showToast("Resposta enviada.", "success");
+          fecharResponseModal();
+          loadNotas();
+        } catch (err) {
+          let msg = "Erro ao enviar resposta.";
+          try {
+            const parsed = JSON.parse(err.message);
+            if (parsed.detail) msg = parsed.detail;
+          } catch {}
+          showToast(msg, "error");
+        } finally {
+          setBtnLoading(btn, false);
+        }
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (
+          e.key === "Escape" &&
+          !document.getElementById("responseModal").classList.contains("hidden")
+        ) {
+          fecharResponseModal();
+        }
+      });
       function statusLabel(s) {
         return (
           {
@@ -1099,6 +1062,15 @@
             em_analise: "Em análise",
             lancada: "Lançada",
           }[s] || s
+        );
+      }
+      function nomeLoja(key) {
+        return (
+          {
+            canguaretama: "Canguaretama",
+            pipa: "Praia de Pipa",
+            gostoso: "São Miguel do Gostoso",
+          }[key] || "—"
         );
       }
       function setBtnLoading(btn, loading) {
@@ -1242,6 +1214,8 @@
         document.getElementById("userName").textContent = user.username;
         document.getElementById("userRole").textContent = user.is_fiscal
           ? "Setor fiscal"
+          : user.is_compras
+          ? "Setor compras"
           : "Estoquista";
         document.getElementById("userAvatar").textContent = (user.username ||
           "?")[0].toUpperCase();
@@ -1251,6 +1225,13 @@
         });
         document.querySelectorAll(".estoquista-only").forEach((el) => {
           el.style.display = user.is_estoquista ? "" : "none";
+        });
+        document.querySelectorAll(".compras-only").forEach((el) => {
+          if (el.classList.contains("estoquista-only")) {
+            el.style.display = user.is_estoquista || user.is_compras ? "" : "none";
+          } else {
+            el.style.display = user.is_compras ? "" : "none";
+          }
         });
 
         lucide.createIcons();
@@ -1441,6 +1422,7 @@
           fd.append("numero_nota", document.getElementById("nf_numero").value);
           fd.append("chave_acesso", document.getElementById("nf_chave").value);
           fd.append("pdf_nota", document.getElementById("nf_pdf").files[0]);
+          fd.append("loja", document.getElementById("nf_loja").value);
           fd.append("observacao", document.getElementById("nf_obs").value);
           try {
             await api("POST", "/notas/", fd, true);
@@ -1460,11 +1442,12 @@
           ? "Todas as notas do sistema."
           : "Notas criadas por você.";
         const status = document.getElementById("filtroStatus").value;
-        try {
-          const data = await api("GET", "/notas/");
-          let list = data.results || data;
-          if (status) list = list.filter((n) => n.status === status);
-
+          const loja = document.getElementById("filtroLoja").value;
+          try {
+            const data = await api("GET", "/notas/");
+            let list = data.results || data;
+            if (status) list = list.filter((n) => n.status === status);
+            if (loja) list = list.filter((n) => n.loja === loja);
           // ===== TABELA DESKTOP =====
           document.getElementById("notasBody").innerHTML = list.length
             ? list
@@ -1488,11 +1471,21 @@
                         : '<span class="text-xs text-stone-400 dark:text-neutral-500">—</span>'
                     }
                 </td>
+                <td class="px-4 py-3 text-stone-700 dark:text-neutral-300 align-top">${nomeLoja(n.loja)}</td>
                 <td class="px-4 py-3 align-top">
                     ${
                       n.observacao
                         ? `<div class="text-xs text-stone-600 dark:text-neutral-400 max-w-xs whitespace-pre-wrap break-words">${n.observacao}</div>`
                         : '<span class="text-xs text-stone-400 dark:text-neutral-500">—</span>'
+                    }
+                    ${
+                      n.observacao_resposta
+                        ? `<div class="mt-2 text-sm bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900 rounded-md p-2">
+                              <div class="text-xs text-emerald-700 font-semibold">Resposta do fiscal</div>
+                              <div class="text-sm text-stone-700 dark:text-neutral-300 whitespace-pre-wrap break-words">${n.observacao_resposta}</div>
+                              <div class="text-xs text-stone-500 dark:text-neutral-500 mt-1">por ${n.observacao_resposta_por || '—'} em ${fmtDate(n.observacao_resposta_data)}</div>
+                           </div>`
+                        : ""
                     }
                 </td>
                 <td class="px-4 py-3 align-top">
@@ -1504,9 +1497,14 @@
                     <div class="flex items-center justify-end gap-1 flex-wrap">
                         ${
                           user.is_fiscal && n.status !== "lancada"
-                            ? `<button onclick="lancar(${n.id})" class="bg-emerald-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-emerald-700 shadow-soft inline-flex items-center gap-1 touch-manipulation">
+                            ? `
+                              <button onclick="lancar(${n.id})" class="bg-emerald-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-emerald-700 shadow-soft inline-flex items-center gap-1 touch-manipulation">
                                   <i data-lucide="check" class="w-3.5 h-3.5"></i> Lançar
-                               </button>`
+                               </button>
+                              <button onclick="abrirResponder(${n.id})" class="bg-brand-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-brand-700 shadow-soft inline-flex items-center gap-1 touch-manipulation ml-2">
+                                  <i data-lucide="message-square" class="w-3.5 h-3.5"></i> Responder
+                               </button>
+                              `
                             : ""
                         }
                         ${
@@ -1528,7 +1526,7 @@
         `,
                 )
                 .join("")
-            : `<tr><td colspan="8">${emptyState("Nenhuma nota encontrada.", "files")}</td></tr>`;
+            : `<tr><td colspan="9">${emptyState("Nenhuma nota encontrada.", "files")}</td></tr>`;
 
           // ===== CARDS MOBILE (COM BOTÕES EDITAR/EXCLUIR) =====
           document.getElementById("notasCards").innerHTML = list.length
@@ -1548,6 +1546,10 @@
                         <i data-lucide="file-plus" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-stone-400 dark:text-neutral-500"></i>
                         <span>Criada por <span class="font-medium text-stone-800 dark:text-neutral-200">${n.criado_por}</span> em ${fmtDate(n.data_criacao)}</span>
                     </div>
+                    <div class="flex items-start gap-2 text-stone-600 dark:text-neutral-400">
+                        <i data-lucide="map-pin" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-stone-400 dark:text-neutral-500"></i>
+                        <span>Loja de destino <span class="font-medium text-stone-800 dark:text-neutral-200">${nomeLoja(n.loja)}</span></span>
+                    </div>
                     ${
                       n.observacao
                         ? `
@@ -1556,6 +1558,17 @@
                             <span class="text-stone-700 dark:text-neutral-300 break-words whitespace-pre-wrap overflow-hidden w-full observacao-text">${n.observacao}</span>
                         </div>
                     `
+                        : ""
+                    }
+                    ${
+                      n.observacao_resposta
+                        ? `
+                        <div class="mt-2 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900 rounded-md p-2">
+                            <div class="text-xs text-emerald-700 font-semibold">Resposta do fiscal</div>
+                            <div class="text-sm text-stone-700 dark:text-neutral-300 whitespace-pre-wrap break-words">${n.observacao_resposta}</div>
+                            <div class="text-xs text-stone-500 dark:text-neutral-500 mt-1">por ${n.observacao_resposta_por || '—'} em ${fmtDate(n.observacao_resposta_data)}</div>
+                        </div>
+                      `
                         : ""
                     }
                     ${
@@ -1576,9 +1589,14 @@
                     <div class="flex items-center gap-1 ml-auto">
                         ${
                           user.is_fiscal && n.status !== "lancada"
-                            ? `<button onclick="lancar(${n.id})" class="bg-emerald-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-emerald-700 shadow-soft inline-flex items-center gap-1 touch-manipulation">
+                            ? `
+                              <button onclick="lancar(${n.id})" class="bg-emerald-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-emerald-700 shadow-soft inline-flex items-center gap-1 touch-manipulation">
                                   <i data-lucide="check" class="w-4 h-4"></i> Lançar
-                               </button>`
+                               </button>
+                              <button onclick="abrirResponder(${n.id})" class="bg-brand-600 text-white text-xs rounded-md px-3 py-1.5 hover:bg-brand-700 shadow-soft inline-flex items-center gap-1 touch-manipulation ml-2">
+                                  <i data-lucide="message-square" class="w-4 h-4"></i> Responder
+                               </button>
+                              `
                             : ""
                         }
                         ${
@@ -1670,10 +1688,17 @@
           document.getElementById("edit_id").value = data.id;
           document.getElementById("edit_numero").value = data.numero_nota;
           document.getElementById("edit_chave").value = data.chave_acesso;
+          document.getElementById("edit_loja").value = data.loja || "canguaretama";
 
           // CORREÇÃO: Carrega a observação no textarea
           const obsTextarea = document.getElementById("edit_obs");
           obsTextarea.value = data.observacao || "";
+
+          // Carrega resposta do fiscal (se houver) e mostra o campo apenas para fiscal
+          const respWrapper = document.getElementById("edit_resposta_wrapper");
+          const respTextarea = document.getElementById("edit_resposta");
+          if (respTextarea) respTextarea.value = data.observacao_resposta || "";
+          if (respWrapper) respWrapper.style.display = user.is_fiscal ? "" : "none";
 
           // Atualiza o contador
           atualizarContadorEdit();
@@ -1699,7 +1724,9 @@
             await api("PATCH", `/notas/${id}/`, {
               numero_nota: document.getElementById("edit_numero").value,
               chave_acesso: document.getElementById("edit_chave").value,
+              loja: document.getElementById("edit_loja").value,
               observacao: document.getElementById("edit_obs").value,
+              observacao_resposta: document.getElementById("edit_resposta").value,
             });
             showToast("Nota atualizada!", "success");
             fecharEditModal();
