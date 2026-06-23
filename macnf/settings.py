@@ -102,9 +102,7 @@ USE_CLOUDFLARE_R2 = config("USE_CLOUDFLARE_R2", default=False, cast=bool)
 if USE_CLOUDFLARE_R2:
     INSTALLED_APPS.append("storages")
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
-    STORAGES["default"] = {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage"
-    }
+    STORAGES["default"] = {"BACKEND": "storages.backends.s3boto3.S3Boto3Storage"}
 
     AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
@@ -112,16 +110,20 @@ if USE_CLOUDFLARE_R2:
     AWS_S3_ENDPOINT_URL = config("AWS_S3_ENDPOINT_URL")
     AWS_S3_REGION_NAME = config("AWS_S3_REGION_NAME", default="auto")
     AWS_S3_SIGNATURE_VERSION = "s3v4"
-    AWS_S3_ADDRESSING_STYLE = config("AWS_S3_ADDRESSING_STYLE", default="virtual")
+    AWS_S3_ADDRESSING_STYLE = config("AWS_S3_ADDRESSING_STYLE", default="path")
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
-    AWS_QUERYSTRING_AUTH = False
 
-    AWS_S3_CUSTOM_DOMAIN = config(
-        "AWS_S3_CUSTOM_DOMAIN",
-        default=f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_ENDPOINT_URL.replace('https://', '').rstrip('/')}",
-    )
-    MEDIA_URL = config("MEDIA_URL", default=f"https://{AWS_S3_CUSTOM_DOMAIN}/")
+    # Links assinados e temporários (1h) — só quem tem o link válido na hora consegue
+    # abrir o PDF, em vez de uma URL pública permanente.
+    AWS_QUERYSTRING_AUTH = True
+    AWS_QUERYSTRING_EXPIRE = 3600
+
+    # Só define um domínio customizado se você configurar um de verdade (CDN/Access).
+    # Sem isso, o storage usa o AWS_S3_ENDPOINT_URL direto, com link assinado.
+    AWS_S3_CUSTOM_DOMAIN = config("AWS_S3_CUSTOM_DOMAIN", default=None)
+    if AWS_S3_CUSTOM_DOMAIN:
+        MEDIA_URL = config("MEDIA_URL", default=f"https://{AWS_S3_CUSTOM_DOMAIN}/")
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
