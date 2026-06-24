@@ -942,10 +942,11 @@
           <input type="hidden" id="response_id" />
           <div>
             <label class="block text-sm font-medium text-stone-700 dark:text-neutral-300 mb-1.5">Resposta do fiscal</label>
-            <textarea id="response_text" maxlength="2000" rows="5" required class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"></textarea>
+            <textarea id="response_text" maxlength="2000" rows="5" class="w-full bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm text-stone-900 dark:text-neutral-100 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"></textarea>
           </div>
           <div class="flex gap-3 pt-2">
             <button type="button" onclick="fecharResponseModal()" class="flex-1 border border-stone-300 dark:border-neutral-700 rounded-lg py-3 sm:py-2.5 text-sm text-stone-700 dark:text-neutral-300 hover:bg-stone-100 dark:hover:bg-neutral-800 transition touch-manipulation">Cancelar</button>
+            <button type="button" onclick="limparResposta()" class="flex-1 border border-red-300 dark:border-red-700 rounded-lg py-3 sm:py-2.5 text-sm text-red-700 dark:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/30 transition touch-manipulation">Limpar resposta</button>
             <button type="submit" class="flex-1 bg-brand-600 text-white rounded-lg py-3 sm:py-2.5 text-sm font-medium hover:bg-brand-700 shadow-soft transition disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation">Enviar resposta</button>
           </div>
         </form>
@@ -1021,6 +1022,32 @@
 
       function fecharResponseModal() {
         document.getElementById("responseModal").classList.add("hidden");
+      }
+
+      function limparResposta() {
+        if (!confirm("Tem certeza que deseja remover a resposta?")) return;
+        const btn = document.querySelector('button[onclick="limparResposta()"]');
+        setBtnLoading(btn, true);
+        const id = document.getElementById("response_id").value;
+        (async () => {
+          try {
+            await api("PATCH", `/notas/${id}/`, {
+              observacao_resposta: "",
+            });
+            showToast("Resposta removida.", "success");
+            fecharResponseModal();
+            loadNotas();
+          } catch (err) {
+            let msg = "Erro ao remover resposta.";
+            try {
+              const parsed = JSON.parse(err.message);
+              if (parsed.detail) msg = parsed.detail;
+            } catch {}
+            showToast(msg, "error");
+          } finally {
+            setBtnLoading(btn, false);
+          }
+        })();
       }
 
       document.getElementById("responseForm").addEventListener("submit", async (e) => {
