@@ -1,4 +1,5 @@
 import re
+from django.db.utils import OperationalError, ProgrammingError
 from rest_framework import serializers
 from validate_docbr import CNPJ
 from .models import Fornecedor, NotaFiscal, HistoricoNotaFiscal, AnexoNotaFiscal
@@ -71,7 +72,7 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
     lancada_por = serializers.StringRelatedField(read_only=True)
     observacao_resposta_por = serializers.StringRelatedField(read_only=True)
     historico = HistoricoSerializer(many=True, read_only=True)
-    anexos = AnexoNotaFiscalSerializer(many=True, read_only=True)
+    anexos = serializers.SerializerMethodField()
 
     class Meta:
         model = NotaFiscal
@@ -106,6 +107,13 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
             "observacao_resposta_por",
             "observacao_resposta_data",
         ]
+
+    def get_anexos(self, obj):
+        try:
+            queryset = obj.anexos.all()
+        except (ProgrammingError, OperationalError):
+            return []
+        return AnexoNotaFiscalSerializer(queryset, many=True, context=self.context).data
 
     def validate_chave_acesso(self, value):
         return validar_chave_acesso(value)

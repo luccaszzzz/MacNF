@@ -3,11 +3,13 @@ import uuid
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.db import connection
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework.authtoken.models import Token
 
 from .models import Fornecedor, NotaFiscal, HistoricoNotaFiscal
+from .serializers import NotaFiscalSerializer
 
 
 class NotaFiscalApiTests(TestCase):
@@ -124,3 +126,12 @@ class NotaFiscalApiTests(TestCase):
 
         self.assertTrue(caminho_arquivo)
         self.assertFalse(nota.pdf_nota.storage.exists(caminho_arquivo))
+
+    def test_serializer_nao_quebra_quando_tabela_de_anexos_nao_existe(self):
+        with connection.schema_editor() as editor:
+            editor.execute("DROP TABLE IF EXISTS notas_anexonotafiscal")
+
+        nota = self._make_nota(numero_nota="400")
+        serializer = NotaFiscalSerializer(nota)
+
+        self.assertEqual(serializer.data["anexos"], [])
