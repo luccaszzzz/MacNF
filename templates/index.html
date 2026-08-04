@@ -545,7 +545,6 @@
                       id="nf_pdf"
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,.webp,image/*,application/pdf"
-                      capture="environment"
                       multiple
                       required
                       class="w-full text-sm text-stone-700 dark:text-neutral-300"
@@ -840,11 +839,20 @@
                 <div
                   class="px-4 sm:px-5 py-4 border-b border-stone-300 dark:border-neutral-800"
                 >
-                  <h3
-                    class="font-semibold text-stone-900 dark:text-neutral-100 text-sm sm:text-base"
-                  >
-                    Cadastrados
-                  </h3>
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <h3
+                      class="font-semibold text-stone-900 dark:text-neutral-100 text-sm sm:text-base"
+                    >
+                      Cadastrados
+                    </h3>
+                    <input
+                      id="filtroFornecedorBusca"
+                      type="search"
+                      placeholder="Buscar fornecedor ou CNPJ"
+                      oninput="loadFornecedores()"
+                      class="w-full sm:w-72 bg-white dark:bg-neutral-800 border border-stone-300 dark:border-neutral-700 rounded-lg px-3 py-2 text-sm text-stone-900 dark:text-neutral-100 placeholder-stone-400 dark:placeholder-neutral-500 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 dark:focus:ring-brand-900 transition"
+                    />
+                  </div>
                 </div>
                 <ul
                   id="fornList"
@@ -1445,8 +1453,16 @@
 
       async function loadFornecedores() {
         try {
+          const busca = document.getElementById("filtroFornecedorBusca")?.value.trim().toLowerCase();
           const list = await getFornecedores(true);
-          document.getElementById("fornList").innerHTML = list.length
+          const filtered = busca
+            ? list.filter((f) =>
+                [f.nome, f.cnpj]
+                  .filter(Boolean)
+                  .some((value) => value.toLowerCase().includes(busca)),
+              )
+            : list;
+          document.getElementById("fornList").innerHTML = filtered.length
             ? list
                 .map((f) => {
                   const nomeEscapado = (f.nome || "")
