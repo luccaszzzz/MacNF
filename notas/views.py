@@ -152,8 +152,12 @@ class NotaFiscalViewSet(viewsets.ModelViewSet):
         nota_atualizada = serializer.save()
 
         # Se o fiscal respondeu à observação, registra autor e data e cria histórico específico
-        resposta = serializer.validated_data.get("observacao_resposta") if hasattr(serializer, "validated_data") else None
-        if resposta and is_fiscal(self.request.user):
+        resposta = (
+            serializer.validated_data.get("observacao_resposta")
+            if hasattr(serializer, "validated_data")
+            else None
+        )
+        if resposta and (is_fiscal(self.request.user) or is_compras(self.request.user)):
             nota_atualizada.observacao_resposta_por = self.request.user
             nota_atualizada.observacao_resposta_data = timezone.now()
             nota_atualizada.save()

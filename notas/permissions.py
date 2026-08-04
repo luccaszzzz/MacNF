@@ -47,9 +47,9 @@ class NotaFiscalPermission(BasePermission):
         if not request.user.is_authenticated:
             return False
 
-        # Ações exclusivas do fiscal
+        # Ações exclusivas do fiscal ou do setor de compras
         if view.action in ("lancar", "relatorio"):
-            return is_fiscal(request.user)
+            return is_fiscal(request.user) or is_compras(request.user)
 
         # Criar nota: estoquista ou compras (ou admin)
         if view.action == "create":
@@ -63,14 +63,8 @@ class NotaFiscalPermission(BasePermission):
         if is_fiscal(request.user):
             return True
 
-        # Compras pode ver todas as notas, e editar/excluir apenas suas próprias não lançadas
+        # Compras tem as mesmas permissões de fiscal
         if is_compras(request.user):
-            if request.method in SAFE_METHODS:
-                return True
-            if obj.criado_por != request.user:
-                return False
-            if request.method not in SAFE_METHODS and obj.status == "lancada":
-                return False
             return True
 
         # Estoquista: só mexe nas próprias notas
