@@ -1,4 +1,5 @@
 import re
+from django.db import connection
 from django.db.utils import OperationalError, ProgrammingError
 from rest_framework import serializers
 from validate_docbr import CNPJ
@@ -109,6 +110,16 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
         ]
 
     def get_anexos(self, obj):
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1 FROM information_schema.tables WHERE table_name = 'notas_anexonotafiscal'")
+                exists = cursor.fetchone() is not None
+        except Exception:
+            exists = False
+
+        if not exists:
+            return []
+
         try:
             queryset = obj.anexos.all()
         except (ProgrammingError, OperationalError):
