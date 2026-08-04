@@ -1,7 +1,7 @@
 import re
 from rest_framework import serializers
 from validate_docbr import CNPJ
-from .models import Fornecedor, NotaFiscal, HistoricoNotaFiscal
+from .models import Fornecedor, NotaFiscal, HistoricoNotaFiscal, AnexoNotaFiscal
 
 
 def validar_cnpj(value):
@@ -59,12 +59,19 @@ class HistoricoSerializer(serializers.ModelSerializer):
         fields = ["id", "acao", "usuario", "data_hora", "detalhes"]
 
 
+class AnexoNotaFiscalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AnexoNotaFiscal
+        fields = ["id", "arquivo", "criado_em"]
+
+
 class NotaFiscalSerializer(serializers.ModelSerializer):
     fornecedor_nome = serializers.CharField(source="fornecedor.nome", read_only=True)
     criado_por = serializers.StringRelatedField(read_only=True)
     lancada_por = serializers.StringRelatedField(read_only=True)
     observacao_resposta_por = serializers.StringRelatedField(read_only=True)
     historico = HistoricoSerializer(many=True, read_only=True)
+    anexos = AnexoNotaFiscalSerializer(many=True, read_only=True)
 
     class Meta:
         model = NotaFiscal
@@ -87,6 +94,7 @@ class NotaFiscalSerializer(serializers.ModelSerializer):
             "data_lancamento",
             "lancada_por",
             "historico",
+            "anexos",
         ]
         read_only_fields = [
             "status",

@@ -1,5 +1,5 @@
 from django.utils import timezone
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.deletion import ProtectedError
 from django.core.files.base import ContentFile
 from rest_framework import viewsets, status
@@ -12,7 +12,7 @@ from rest_framework.authtoken.models import Token
 from PIL import Image
 from io import BytesIO
 
-from .models import Fornecedor, NotaFiscal, HistoricoNotaFiscal
+from .models import Fornecedor, NotaFiscal, HistoricoNotaFiscal, AnexoNotaFiscal
 from .serializers import FornecedorSerializer, NotaFiscalSerializer
 from .permissions import (
     FornecedorPermission,
@@ -73,42 +73,71 @@ class NotaFiscalViewSet(viewsets.ModelViewSet):
         # Estoquista (não-admin) só vê suas próprias notas
         if is_estoquista(self.request.user) and not self.request.user.is_superuser:
             qs = qs.filter(criado_por=self.request.user)
+
+        search = (self.request.query_params.get("search") or "").strip()
+        fornecedor_id = self.request.query_params.get("fornecedor")
+        data_criacao = self.request.query_params.get("data_criacao")
+
+        if search:
+            qs = qs.filter(
+                Q(numero_nota__icontains=search)
+                | Q(chave_acesso__icontains=search)
+                | Q(observacao__icontains=search)
+                | Q(fornecedor__nome__icontains=search)
+            )
+        if fornecedor_id:
+            qs = qs.filter(fornecedor_id=fornecedor_id)
+        if data_criacao:
+            qs = qs.filter(data_criacao__date=data_criacao)
+
         return qs
 
-    def perform_create(self, serializer):
-        """Cria nota — comprime imagens automaticamente antes de salvar."""
-        arquivo = self.request.FILES.get("pdf_nota")
+    def _processar_arquivo(self, arquivo):
+        if not arquivo:
+            return arquivo
 
-        # Se for imagem, comprime antes de salvar
-        if arquivo and arquivo.content_type.startswith("image/"):
+        if arquivo.content_type and arquivo.content_type.startswith("image/"):
             try:
                 img = Image.open(arquivo)
 
-                # Converte HEIC/outros pra JPEG
                 if img.mode in ("RGBA", "LA", "P"):
                     img = img.convert("RGB")
 
-                # Redimensiona se for muito grande (max 2000px no maior lado)
                 img.thumbnail((2000, 2000), Image.Resampling.LANCZOS)
 
-                # Salva como JPEG comprimido em memória
                 buffer = BytesIO()
                 img.save(buffer, format="JPEG", quality=85, optimize=True)
                 buffer.seek(0)
 
-                # Substitui o arquivo original pelo comprimido
                 nome_novo = arquivo.name.rsplit(".", 1)[0] + ".jpg"
-                arquivo_comprimido = ContentFile(buffer.read(), name=nome_novo)
-                serializer.validated_data["pdf_nota"] = arquivo_comprimido
+                return ContentFile(buffer.read(), name=nome_novo)
             except Exception:
-                # Se falhar (arquivo corrompido, etc.), salva original mesmo
-                pass
+                return arquivo
+
+        return arquivo
+
+    def perform_create(self, serializer):
+        """Cria nota — comprime imagens automaticamente antes de salvar."""
+        arquivos = list(self.request.FILES.getlist("pdf_nota"))
+        if not arquivos:
+            arquivo = self.request.FILES.get("pdf_nota")
+            if arquivo:
+                arquivos = [arquivo]
+
+        arquivo_principal = self._processar_arquivo(arquivos[0]) if arquivos else None
+        if arquivo_principal:
+            serializer.validated_data["pdf_nota"] = arquivo_principal
 
         nota = serializer.save(
             criado_por=self.request.user,
             status="em_analise",
             data_envio_fiscal=timezone.now(),
         )
+
+        for arquivo_extra in arquivos[1:]:
+            arquivo_processado = self._processar_arquivo(arquivo_extra)
+            AnexoNotaFiscal.objects.create(nota=nota, arquivo=arquivo_processado)
+
         HistoricoNotaFiscal.objects.create(
             nota=nota,
             acao="criada e enviada ao fiscal",

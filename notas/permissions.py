@@ -34,9 +34,9 @@ class FornecedorPermission(BasePermission):
 
 class NotaFiscalPermission(BasePermission):
     """
-    Estoquista:
-      - cria notas
-      - vê e edita apenas as próprias notas (e só enquanto não lançadas)
+    Estoquista e compras:
+      - criam notas
+      - veem e editam apenas as próprias notas (e só enquanto não lançadas)
     Setor fiscal:
       - vê todas as notas
       - lança notas

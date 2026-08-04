@@ -73,6 +73,18 @@ class NotaFiscal(models.Model):
         return f"NF {self.numero_nota} — {self.fornecedor.nome}"
 
 
+class AnexoNotaFiscal(models.Model):
+    nota = models.ForeignKey(NotaFiscal, on_delete=models.CASCADE, related_name="anexos")
+    arquivo = models.FileField(upload_to="notas/anexos/%Y/%m/")
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["id"]
+
+    def __str__(self):
+        return f"Anexo {self.id} da nota {self.nota_id}"
+
+
 class HistoricoNotaFiscal(models.Model):
     nota = models.ForeignKey(
         NotaFiscal, on_delete=models.CASCADE, related_name="historico"
