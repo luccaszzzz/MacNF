@@ -1463,7 +1463,7 @@
               )
             : list;
           document.getElementById("fornList").innerHTML = filtered.length
-            ? list
+            ? filtered
                 .map((f) => {
                   const nomeEscapado = (f.nome || "")
                     .replace(/'/g, "\\'")
