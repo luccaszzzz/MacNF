@@ -6,7 +6,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config("SECRET_KEY", default="troque-em-producao")
 DEBUG = config("DEBUG", default=False, cast=bool)
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*").split(",")
+ALLOWED_HOSTS = config(
+    "ALLOWED_HOSTS",
+    default="macnf-production-abc1.up.railway.app",
+).split(",")
 CSRF_TRUSTED_ORIGINS = [
     "https://*.up.railway.app",
     "https://*.railway.app",
@@ -27,8 +30,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -117,7 +120,7 @@ if USE_CLOUDFLARE_R2:
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
 
-    # Links assinados e temporários (1h) — só quem tem o link válido na hora consegue
+    # Links assinados e temporários (1h) - só quem tem o link válido na hora consegue
     # abrir o PDF, em vez de uma URL pública permanente.
     AWS_QUERYSTRING_AUTH = True
     AWS_QUERYSTRING_EXPIRE = 3600
